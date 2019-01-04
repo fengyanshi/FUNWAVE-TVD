@@ -60,9 +60,6 @@ SUBROUTINE OUTPUT
 # if defined(SEDIMENT)
      USE SEDIMENT_MODULE
 # endif
-# if defined (TRACKING)
-     USE TRACER
-# endif
 
     IMPLICIT NONE
 
@@ -107,14 +104,6 @@ SUBROUTINE OUTPUT
        CALL OUTPUT_SEDIMENT
       ENDIF      
 # endif
-# if defined (TRACKING)
-      PLOT_COUNT_TRACKING=PLOT_COUNT_TRACKING+DT
-      IF(PLOT_COUNT_TRACKING>=PLOT_INTV_TRACKING)THEN
-       PLOT_COUNT_TRACKING=PLOT_COUNT_TRACKING-PLOT_INTV_TRACKING
-       CALL OUTPUT_TRACKING
-      ENDIF      
-# endif
-
 
 
 END SUBROUTINE OUTPUT
@@ -1022,35 +1011,6 @@ SUBROUTINE READ_INPUT
 
         IF(WaveMaker(1:7)=='INI_SOL')THEN
 
-          CALL READ_LOGICAL(SolitaryPositiveDirection,FILE_NAME,  &
-               'SolitaryPositiveDirection',ierr)
-
-        IF(ierr==1)THEN
-          SolitaryPositiveDirection = .TRUE.
-        ENDIF
-
-        IF(SolitaryPositiveDirection) THEN
-# if defined (PARALLEL)
-      if (myid.eq.0) THEN
-         WRITE(*,'(A60)')'Solitary wave propagate in + X direction'
-         WRITE(3,'(A60)')'Solitary wave propagate in + X direction'
-      endif
-# else
-         WRITE(*,'(A60)')'Solitary wave propagate in + X direction'
-         WRITE(3,'(A60)')'Solitary wave propagate in + X direction'
-# endif
-        ELSE
-# if defined (PARALLEL)
-      if (myid.eq.0) THEN
-         WRITE(*,'(A60)')'Solitary wave propagate in - X direction'
-         WRITE(3,'(A60)')'Solitary wave propagate in - X direction'
-      endif
-# else
-         WRITE(*,'(A60)')'Solitary wave propagate in - X direction'
-         WRITE(3,'(A60)')'Solitary wave propagate in - X direction'
-# endif
-        ENDIF
-
           CALL READ_FLOAT(AMP_SOLI,FILE_NAME,'AMP',ierr)
       IF(ierr==1)THEN
 # if defined (PARALLEL)
@@ -1896,31 +1856,6 @@ SUBROUTINE READ_INPUT
 
        CALL READ_FLOAT(DEP_Ser,FILE_NAME,'DepthWaveMaker',ierr)
 
-        IF(ierr==1)THEN
-       CALL READ_FLOAT(DEP_Ser,FILE_NAME,'DEP_WK',ierr)
-
-# if defined (PARALLEL)
-      if (myid.eq.0) WRITE(3,'(A50)') 'DepthWaveMaker not defined, read DEP_WK'
-# else
-      WRITE(3,'(A50)')'DepthWaveMaker not defined, read DEP_WK'
-# endif
-      IF(ierr==1)THEN ! if can not find again
-# if defined (PARALLEL)
-      if (myid.eq.0) THEN
-         WRITE(*,'(A80)')'you should specify either DepthWaveMaker or DEP_WK,STOP'
-         WRITE(3,'(A80)')'you should specify either DepthWaveMaker or DEP_WK,STOP'
-      endif
-       call MPI_FINALIZE ( ier )
-# else
-         WRITE(*,'(A80)')'you should specify either DepthWaveMaker or DEP_WK,STOP'
-         WRITE(3,'(A80)')'you should specify either DepthWaveMaker or DEP_WK,STOP'
-# endif
-        STOP
-      ENDIF
-
-          ENDIF ! end read DepthWaveMaker
-
-
       IF(WaveMaker(1:3)=='ABS')THEN
        CALL READ_FLOAT(WidthWaveMaker,FILE_NAME,'WidthWaveMaker',ierr) 
 !  get R and A for sponge_wavemaker calculation  
@@ -2541,15 +2476,15 @@ SUBROUTINE READ_INPUT
 # if defined (ZALPHA)
           CALL READ_FLOAT(Beta_ref,FILE_NAME,'Beta_ref',ierr)
       IF(ierr==1)THEN
-        Beta_ref = -0.531_SP
+        Beta_ref = 0.531_SP
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A40)')'Beta_ref Default:  -0.531'
-         WRITE(3,'(A40)')'Beta_ref Default:  -0.531'
+         WRITE(*,'(A40)')'Beta_ref Default:  0.531'
+         WRITE(3,'(A40)')'Beta_ref Default:  0.531'
       endif
 # else
-         WRITE(*,'(A40)')'Beta_ref Default:  -0.531'
-         WRITE(3,'(A40)')'Beta_ref Default:  -0.531'
+         WRITE(*,'(A40)')'Beta_ref Default:  0.531'
+         WRITE(3,'(A40)')'Beta_ref Default:  0.531'
 # endif
        ENDIF
 # endif
@@ -3320,6 +3255,7 @@ SUBROUTINE STATIONS
 
      INTEGER :: iunit
      REAL(SP) :: dum1,dum2
+     REAL(SP) :: eta_sta,u_sta,v_sta
      CHARACTER(LEN=80)::FILE_NAME=' '
      CHARACTER(LEN=80)::TMP_NAME=' '
      CHARACTER(LEN=80)::FDIR=' '
@@ -3393,8 +3329,16 @@ SUBROUTINE STATIONS
      do i=1,NumberStations
        if (nsta(i).eq.1) then
           iunit=100+i
-          write (iunit,'(20E16.8)') time, eta(ista(i),jsta(i)),&
-                          u(ista(i),jsta(i)),v(ista(i),jsta(i))
+          IF(mask(ista(i),jsta(i))<1)THEN
+            eta_sta=ZERO
+            u_sta=ZERO
+            v_sta=ZERO
+          ELSE  ! to avoid topography on nested water surface
+            eta_sta=eta(ista(i),jsta(i))
+            u_sta=u(ista(i),jsta(i))
+            v_sta=v(ista(i),jsta(i)) 
+          ENDIF
+          write (iunit,'(20E16.5E4)') time, eta_sta,u_sta,v_sta
        endif
      enddo
 
@@ -3498,8 +3442,7 @@ SUBROUTINE STATIONS_SPHERICAL_IJ
             u_sta=u(ista(i),jsta(i))
             v_sta=v(ista(i),jsta(i)) 
           ENDIF
-          write (iunit,'(20E16.8)') time, eta_sta,&
-                          u_sta,v_sta
+          write (iunit,'(20E16.5E4)') time, eta_sta,u_sta,v_sta
        endif
      enddo
 
@@ -3601,12 +3544,10 @@ SUBROUTINE STATIONS
           ELSE  ! to avoid topography on nested water surface
             eta_sta=eta(ista(i),jsta(i))
             u_sta=u(ista(i),jsta(i))
-            v_sta=v(ista(i),jsta(i)) 
+            v_sta=v(ista(i),jsta(i))
           ENDIF
 
-          write (iunit,'(20E16.5)') time, eta_sta,&
-                          u_sta,v_sta
-
+          write (iunit,'(20E16.5E4)') time,eta_sta,u_sta,v_sta
 !          write (iunit,*) time, eta(ista(i),jsta(i)),u(ista(i),jsta(i)),&
 !                                v(ista(i),jsta(i))
 
