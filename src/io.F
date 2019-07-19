@@ -126,6 +126,9 @@ END SUBROUTINE OUTPUT
 !  HISTORY:
 !  01/10/2011  Fengyan SHi
 !  12/23/2014  Young-Kwang Choi, added option for intel compiler
+!  07/17/2019  Zhouteng Ye, added 1. get input from command line argument
+!                                 2. input file for post-processor
+!                       
 !
 !-------------------------------------------------------------------------------------
 
@@ -146,6 +149,9 @@ SUBROUTINE READ_INPUT
     INTEGER :: I_comp
     LOGICAL :: INPUT_PHASE = .FALSE.
 
+    !>by Zhouteng Ye
+    CHARACTER(LEN=80)::INPUT_NAME=''
+
 ![ykchoi
     CHARACTER(LEN=80)::FDIR=' '
 !ykchoi]
@@ -161,7 +167,17 @@ SUBROUTINE READ_INPUT
       OPEN(3,FILE='LOG.txt')   
 
 ! read everything from input.txt
-      FILE_NAME='input.txt'
+
+      !>by Zhouteng Ye
+      !> Get the argument from the command.
+      !> If no input in command, file name is 'input.txt' (same as before)
+      !> If the input comes with other name, read the correponding file
+      CALL GETARG(1,INPUT_NAME) 
+      if (INPUT_NAME .eq. '') Then
+        FILE_NAME='input.txt'
+      Else
+        FILE_NAME=INPUT_NAME
+      endif
 
 ! title
       CALL READ_STRING(TITLE,FILE_NAME,'TITLE',ierr)
