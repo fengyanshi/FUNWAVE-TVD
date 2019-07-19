@@ -1,0 +1,212 @@
+#--------------------Use shell------------------------
+SHELL    = /bin/sh
+
+#----------------C Pre-processor----------------------
+#  note: CPP is not C++
+CPP       = /usr/bin/cpp
+CPPFLAGS = -P -traditional
+
+#----------------Fortran Compiler---------------------
+# if $(DEF_FC) is not empty
+ifneq ($(DEF_FC),$(filter $(DEF_FC), ''))
+	FC = $(DEF_FC)
+# if $(DEF_FC) is empty
+else
+# intel
+ifeq ($(COMPILER),$(filter $(COMPILER), intel))
+	USE_MOD = -module $(MOD_DIR)
+ifeq ($(PARALLEL),$(filter $(PARALLEL), true))
+ifeq ($(MPI),$(filter $(COMPILER), intelmpi))
+	FC = mpiifort
+else
+	FC = mpif90
+endif
+else ifeq ($(PARALLEL),$(filter $(PARALLEL), false))
+	FC = ifort
+endif
+endif
+# gnu
+ifeq ($(COMPILER),$(filter $(COMPILER), gnu))
+	USE_MOD = -J $(MOD_DIR)
+ifeq ($(PARALLEL),$(filter $(PARALLEL), true))
+	FC = mpif90
+else ifeq ($(PARALLEL),$(filter $(PARALLEL), false))
+	FC = gfortran
+endif
+endif
+# pgi
+ifeq ($(COMPILER),$(filter $(COMPILER), pgi))
+	USE_MOD = -module $(MOD_DIR)
+ifeq ($(PARALLEL),$(filter $(PARALLEL), true))
+	FC = mpif90
+else ifeq ($(PARALLEL),$(filter $(PARALLEL), false))
+	FC = pgfortran
+endif
+endif
+endif
+
+#----------Debug and optimization flags---------------
+# DEBUG=true
+ifeq ($(DEBUG),$(filter $(DEBUG), true))
+ifeq ($(COMPILER),$(filter $(COMPILER), intel))
+	DEBFLGS  = -g -check -warn -fPIC
+	OPT      = -O0
+else ifeq ($(COMPILER),$(filter $(COMPILER), gnu))
+	DEBFLGS  = -g -Wall -fPIC
+	OPT      = -O0
+else ifeq ($(COMPILER),$(filter $(COMPILER), pgi))
+	DEBFLGS  = -g -fPIC
+	OPT      = -O0
+endif
+endif
+# DEBUG=false
+ifeq ($(DEBUG),$(filter $(DEBUG), false))
+ifeq ($(COMPILER),$(filter $(COMPILER), intel))
+	DEBFLGS  = -fPIC
+	OPT      = -O2
+else ifeq ($(COMPILER),$(filter $(COMPILER), gnu))
+	DEBFLGS  = -fPIC
+	OPT      = -O3
+else ifeq ($(COMPILER),$(filter $(COMPILER), pgi))
+	DEBFLGS  = -fPIC
+	OPT      = -O2 
+endif
+endif
+
+
+
+#---------------Pre-processor flags-------------------
+ifeq ($(PRECISION),$(filter $(PRECISION), double))
+	FLAG_PRECISION = -DDOUBLE_PRECISION 
+else ifeq ($(PRECISION),$(filter $(PRECISION), single))
+	FLAG_PRECISION = 
+else
+$(error Fatal ERROR: PRECISION=$(PRECISION), should be single or double.)
+endif
+
+ifeq ($(SPHERICAL),$(filter $(SPHERICAL), true))
+	FLAG_CARTESIAN = 
+else
+	FLAG_CARTESIAN = -DCARTESIAN
+endif
+
+ifeq ($(PARALLEL),$(filter $(PARALLEL), true))
+	FLAG_PARALLEL = -DPARALLEL
+endif
+
+ifeq ($(COMPILER),$(filter $(COMPILER), intel))
+	FLAG_INTEL = -DINTEL
+endif
+
+ifeq ($(DEBUG),$(filter $(DEBUG), true))
+	FLAG_DEBUG = -DDEBUG
+endif
+
+
+#----------------FUNWAVE flags-----------------------
+FLAG_ARGS = $(FLAG_1) $(FLAG_2) \
+			$(FLAG_3) $(FLAG_4) $(FLAG_5) $(FLAG_6) \
+			$(FLAG_7) $(FLAG_8) $(FLAG_9) $(FLAG_10)  \
+			$(FLAG_11) $(FLAG_12) $(FLAG_13) $(FLAG_14) \
+			$(FLAG_15) $(FLAG_16) $(FLAG_17) $(FLAG_18) \
+			$(FLAG_19) $(FLAG_20) $(FLAG_21) $(FLAG_22) \
+			$(FLAG_23) $(FLAG_24)
+CPPARGS = $(CPPFLAGS) $(DEF_FLAGS) $(FLAG_ARGS) \
+			$(FLAG_PARALLEL) $(FLAG_INTEL) $(FLAG_DEBUG) \
+			$(FLAG_PRECISION) $(FLAG_CARTESIAN)
+
+#--------------------EXEC name------------------------
+ifeq ($(EXEC),$(filter $(EXEC), funwave))
+FLAG_LIST = $(patsubst -D%,%,$(strip $(FLAG_ARGS)))
+$(foreach word,$(FLAG_LIST),$(eval FLAG_FILENAME := $(FLAG_FILENAME)$(word)-))
+
+EXEC_SUFFIX = $(FLAG_FILENAME)-$(COMPILER)
+ifeq ($(PARALLEL),$(filter $(PARALLEL), false))
+	EXEC_SUFFIX := $(EXEC_SUFFIX)-sequential
+endif
+ifeq ($(PRECISION),$(filter $(PRECISION), single))
+	EXEC_SUFFIX := $(EXEC_SUFFIX)-single
+else ifeq ($(PRECISION),$(filter $(PRECISION), double))
+	EXEC_SUFFIX := $(EXEC_SUFFIX)-double
+endif
+ifeq ($(DEBUG),$(filter $(DEBUG), true))
+	EXEC_SUFFIX := $(EXEC_SUFFIX)-DEBUG
+endif
+ifeq ($(SPHERICAL),$(filter $(SPHRICAL), true))
+	EXEC_SUFFIX := $(EXEC_SUFFIX)-SPHERICAL
+endif
+
+EXEC := $(EXEC)-$(EXEC_SUFFIX)
+endif
+EXEC := $(WORK_DIR)/$(EXEC)
+
+#------------------Library name-----------------------
+ifneq ($(DEF_FC),$(filter $(DEF_FC), ''))
+	FCFLAGS := $(DEBFLGS) $(OPT) $(INCS)
+else
+	FCFLAGS := $(DEF_FLAGS) $(INCS)
+endif
+
+#----------------FUNWAVE souce code-------------------
+MODS  = mod_param.F mod_global.F mod_input.F mod_vessel.F mod_bathy_correction.F \
+        mod_meteo.F mod_parallel_field_io.F mod_sediment.F \
+        mod_tracer.F
+
+MAIN  = main.F bc.F fluxes.F init.F io.F tridiagnal.F       \
+        breaker.F derivatives.F dispersion.F etauv_solver.F \
+        sponge.F sources.F masks.F parallel.F statistics.F \
+        wavemaker.F mixing.F nesting.F misc.F samples.F\
+
+#-----------------Compile process---------------------
+SRC_DIR   = $(FUNWAVE_DIR)/src
+PRE_DIR   = $(WORK_DIR)/build/pre
+OBJ_DIR   = $(WORK_DIR)/build/obj
+MOD_DIR   = $(WORK_DIR)/build/mod
+
+SRCS := $(MODS)  $(MAIN)
+SRCS := $(patsubst %,$(SRC_DIR)/%,$(SRCS))
+PRES := $(patsubst $(SRC_DIR)/%.F,$(PRE_DIR)/%.f90,$(SRCS))
+OBJS := $(patsubst $(PRE_DIR)/%.f90,$(OBJ_DIR)/%.o,$(PRES))
+
+# keep the *.f90 files in $(PRE_DIR) after make
+# .PRECIOUS: $(PRE_DIR)/%.f90
+
+# pre-processors
+$(PRE_DIR)/%.f90 : $(SRC_DIR)/%.F
+	$(CPP) $(CPPARGS) $< $@
+
+# compile objective files
+$(OBJ_DIR)/%.o : $(PRE_DIR)/%.f90
+	$(FC) $(FCFLAGS) -c $< -o $@ $(USE_MOD)
+
+# link and generate the exec file
+$(EXEC): $(OBJS)
+	$(FC) $(FCFLAGS) -o $(EXEC) $(OBJS) $(LIBS)
+
+$(PRES): | $(PRE_DIR)
+
+$(PRE_DIR):
+	mkdir -p $(WORK_DIR)
+	mkdir -p $(PRE_DIR)
+	mkdir -p $(OBJ_DIR)
+	mkdir -p $(MOD_DIR)
+
+
+#--------------Cleaning targets-----------------------
+clean:
+		/bin/rm -rf $(WORK_DIR)/build
+
+clean-exe: clean
+		/bin/rm -f $(EXEC)
+
+clobber:	clean
+		/bin/rm -rf $(WORK_DIR)
+
+
+#--------------Print the value of Make variable-------
+print-%  : ; @echo $* = $($*)
+
+#--------------Check the compiler and mpi version-----
+check-env:
+	mpif90 --version
+	mpirun --version
