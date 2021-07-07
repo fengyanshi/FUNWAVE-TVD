@@ -5,11 +5,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # write your OWN PC folder path for fdir
-# Remember that we use for Mac & Linux machines '/', while on windows '\'
-fdir = '/Users/Gaby/Desktop/Postprocessing-Workshop/simple_cases_output/beach_2D/beach_2D/'
+# Remember that we use for Mac & Linux machines '/', while on windows '\', the r denotes raw string
+fdir = r'/Users/Gaby/Desktop/Postprocessing-Workshop/simple_cases_output/beach_2D/beach_2D/'
 
 # upload eta file
-eta = np.loadtxt(fdir+'eta_00001')
+eta = np.loadtxt(os.path.join(fdir,'eta_00001'))
 
 # define plot location
 n,m = np.shape(eta)
@@ -39,10 +39,10 @@ fig = plt.figure(figsize = (wid,length),dpi=200)
 
 for num in range(len(nfile)):
     fnum= '%.5d' % nfile[num]
-    u = np.loadtxt(fdir+'umean_'+fnum)
-    v = np.loadtxt(fdir+'vmean_'+fnum)
-    ht = np.loadtxt(fdir+'Hsig_'+fnum)
-    mask = np.loadtxt(fdir+'mask_'+fnum)
+    u = np.loadtxt(os.path.join(fdir,'umean_'+fnum))
+    v = np.loadtxt(os.path.join(fdir,'vmean_'+fnum))
+    ht = np.loadtxt(os.path.join(fdir,'Hsig_'+fnum))
+    mask = np.loadtxt(os.path.join(fdir, 'mask_'+fnum))
     
     # do not plot values where mask = 0
     u_masked = np.ma.masked_where(mask==0,u)

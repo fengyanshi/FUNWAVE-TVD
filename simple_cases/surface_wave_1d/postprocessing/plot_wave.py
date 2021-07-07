@@ -3,10 +3,10 @@
 # import necessary modules
 import numpy as np               
 import matplotlib.pyplot as plt
-
+import os 
 # write your OWN PC folder path for fdir
-# Remember that we use for Mac & Linux machines '/', while on windows '\'
-fdir = '/Users/Gaby/Desktop/Postprocessing-Workshop/simple_cases_output/surface_wave_1d/surface_wave_1D/' 
+# Remember that we use for Mac & Linux machines '/', while on windows '\', adding r before the string helps with windows machines
+fdir = r'/Users/Gaby/Desktop/Postprocessing-Workshop/simple_cases_output/surface_wave_1d/surface_wave_1D/' 
 
 m = 1024
 dx = 1.0
@@ -40,7 +40,7 @@ length = 4  #length
 # plot figure
 fig = plt.figure(figsize=(wid,length),dpi=600)
 
-eta = np.loadtxt(fdir+'eta_00014')
+eta = np.loadtxt(os.path.join(fdir,'eta_00014'))
 
 ax = fig.add_subplot(1,1,1)
 fig.subplots_adjust(hspace=1,wspace=.5)
