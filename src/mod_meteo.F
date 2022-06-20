@@ -109,15 +109,12 @@ CONTAINS
 ! READ STORM
 
 SUBROUTINE METEO_INITIAL
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,SMALL,LARGE,INPUT_FILE_NAME
+  USE GLOBAL,ONLY : LARGE,INPUT_FILE_NAME
                     
   USE INPUT_READ
   IMPLICIT NONE
   CHARACTER(LEN=80)::FILE_NAME=' '
-  CHARACTER(LEN=80)::TMP_NAME=' '
-  INTEGER :: Ifile,ierr
-  CHARACTER(LEN=80):: StormName
-  CHARACTER(LEN=80) :: WHAT
+  INTEGER :: ierr
 
        ALLOCATE (StormPressureTotal(Mloc,Nloc),&
                 StormPressureX(Mloc,Nloc), &
@@ -350,10 +347,8 @@ SUBROUTINE METEO_INITIAL
 End SUBROUTINE METEO_INITIAL
 
 SUBROUTINE METEO_FORCING
-  USE GLOBAL,ONLY : Mloc,Nloc,tmp1,tmp2,SMALL,TIME,ZERO
   USE INPUT_READ
   IMPLICIT NONE
-  INTEGER :: Ifile,ierr,I,J
 
   IF (WindHollandModel) THEN
 
@@ -380,7 +375,7 @@ SUBROUTINE METEO_FORCING
 END SUBROUTINE METEO_FORCING
 
 SUBROUTINE Holland_Model_Setup
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,SMALL,LARGE, INPUT_FILE_NAME
+  USE GLOBAL,ONLY : INPUT_FILE_NAME
 # if defined (PARALLEL)
   USE GLOBAL,ONLY :   iista,jjsta  !ykchoi Jan/23/2018
 # endif
@@ -412,7 +407,7 @@ SUBROUTINE Holland_Model_Setup
 # if defined (PARALLEL)
 ![---ykchoi Jan/23/2018
 !      Xco(Ibeg) = npx*(Mloc-2*Nghost)*DX
-	Xco(Ibeg) = (iista-1)*DX
+      Xco(Ibeg) = (iista-1)*DX
 !---ykchoi Jan/23/2018]
 
 # else
@@ -494,14 +489,11 @@ SUBROUTINE Holland_Model_Setup
 END SUBROUTINE Holland_Model_Setup
 
 SUBROUTINE Contant_Wind_Field_Setup
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,SMALL,LARGE,INPUT_FILE_NAME
+  USE GLOBAL,ONLY : LARGE,INPUT_FILE_NAME
   USE INPUT_READ
   IMPLICIT NONE
   CHARACTER(LEN=80)::FILE_NAME=' '
-  CHARACTER(LEN=80)::STORM_FILE =' '
-  CHARACTER(LEN=80)::TMP_NAME=' '
-  INTEGER :: Ifile,ierr
-  CHARACTER(LEN=80):: StormName
+  INTEGER :: ierr
   CHARACTER(LEN=80) :: WHAT
 
 ! read storm from input.txt
@@ -539,7 +531,7 @@ SUBROUTINE Holland_Model_Forcing
   USE GLOBAL,ONLY : Mloc,Nloc,tmp1,tmp2,SMALL,TIME,ZERO,ETAmean
   USE INPUT_READ
   IMPLICIT NONE
-  INTEGER :: Ifile,ierr,I,J
+  INTEGER :: Ifile,I,J
   REAL(SP) :: Pn_storm, Pc_storm,A_storm,B_storm,Pw,Vw,Rdis,AngleLocal
   REAL(SP) :: Xstorm, Ystorm
   REAL(SP) :: Celerity,WaveAngle
@@ -673,9 +665,9 @@ SUBROUTINE Constant_Wind_Forcing
   USE GLOBAL,ONLY : Mloc,Nloc,tmp1,tmp2,SMALL,TIME,ZERO,ETAmean
   USE INPUT_READ
   IMPLICIT NONE
-  INTEGER :: Ifile,ierr,I,J
+  INTEGER :: I,J
   REAL(SP) :: AngleLocal
-  REAL(SP) :: Celerity,WaveAngle
+  REAL(SP) :: Celerity
 
     IF(WindForce)THEN
 ! time series wind
@@ -729,7 +721,7 @@ SUBROUTINE Constant_Wind_Forcing
 END SUBROUTINE Constant_Wind_Forcing
 
 SUBROUTINE Slide_Model_Setup
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,SMALL,LARGE,INPUT_FILE_NAME
+  USE GLOBAL,ONLY : INPUT_FILE_NAME
 # if defined (PARALLEL)
   USE GLOBAL,ONLY : iista,jjsta    !ykchoi Jan/23/2018
 # endif
@@ -848,7 +840,7 @@ SUBROUTINE Slide_Model_Forcing
   USE GLOBAL,ONLY : Mloc,Nloc,tmp1,tmp2,SMALL,TIME,ZERO
   USE INPUT_READ
   IMPLICIT NONE
-  INTEGER :: Ifile,ierr,I,J
+  INTEGER :: Ifile,I,J
   REAL(SP) :: Xstorm, Ystorm, C,kb,kw,sech1,sech2
 
 
@@ -946,7 +938,7 @@ SUBROUTINE Slide_Model_Forcing
 END SUBROUTINE Slide_Model_Forcing
 
 SUBROUTINE MeteoGausian_Setup
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,SMALL,LARGE,INPUT_FILE_NAME
+  USE GLOBAL,ONLY : SMALL,INPUT_FILE_NAME
 # if defined (PARALLEL)
   USE GLOBAL,ONLY : iista,jjsta   !ykchoi Jan/23/2018
 # endif
@@ -1062,7 +1054,7 @@ SUBROUTINE MeteoGausian_Forcing
   USE GLOBAL,ONLY : Mloc,Nloc,tmp1,tmp2,SMALL,TIME,ZERO
   USE INPUT_READ
   IMPLICIT NONE
-  INTEGER :: Ifile,ierr,I,J
+  INTEGER :: Ifile,I,J
   REAL(SP) :: DP_storm,SigmaX, SigmaY, Theta
   REAL(SP) :: Xstorm, Ystorm
   REAL(SP) :: a,b,c

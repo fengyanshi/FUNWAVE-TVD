@@ -51,6 +51,7 @@
 !      02/10/2016 Fengyan Shi, separated from INITIALIZATION 
 !
 ! --------------------------------------------------
+#define nop(x) associate( x => x ); end associate
 
 SUBROUTINE WAVEMAKER_INITIALIZATION
      USE GLOBAL
@@ -226,7 +227,7 @@ SUBROUTINE WAVEMAKER_INITIALIZATION
           WRITE(3,*) 'You input phase info'
 # endif
 
-109    INPUT_WAVE_PHASE = .TRUE.
+       INPUT_WAVE_PHASE = .TRUE.
 110    CONTINUE
 
 !  ----
@@ -629,7 +630,7 @@ SUBROUTINE WK_WAVEMAKER_2D_SPECTRAL_DATA &
      USE PARAM
      USE GLOBAL, ONLY : PERIODIC,DY,Nglob
 # if defined (PARALLEL)
-     USE GLOBAL,ONLY : myid,ier
+     USE GLOBAL,ONLY : myid
 # endif
      IMPLICIT NONE
      INTEGER,INTENT(IN) :: NumFreq,NumDir
@@ -832,8 +833,7 @@ SUBROUTINE CALCULATE_Cm_Sm(M,N,DX,DY,Xc,Ibeg,Jbeg,mfreq,mtheta,D_gen,phi1, &
                width,rlamda,beta_gen,Cm,Sm)
      USE PARAM
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : myid,npx,npy,px,py,Mglob,Nglob, &
-	                  iista,jjsta   !ykchoi Jan/23/2018
+     USE GLOBAL, ONLY : iista,jjsta   !ykchoi Jan/23/2018
 # endif
      IMPLICIT NONE
      INTEGER,INTENT(IN) :: M,N,mfreq,mtheta,Ibeg,Jbeg    
@@ -842,7 +842,7 @@ SUBROUTINE CALCULATE_Cm_Sm(M,N,DX,DY,Xc,Ibeg,Jbeg,mfreq,mtheta,D_gen,phi1, &
      REAL(SP),DIMENSION(mfreq),INTENT(IN) :: beta_gen
      REAL(SP),DIMENSION(M,N,mfreq),INTENT(OUT) :: Cm,Sm
      INTEGER::kf,ktheta
-
+     nop(width)
 
         Cm=ZERO
         Sm=ZERO
@@ -901,22 +901,18 @@ END SUBROUTINE CALCULATE_Cm_Sm
 !
 !-------------------------------------------------------------------------------------
 SUBROUTINE CALCULATE_DATA2D_Cm_Sm
-     USE GLOBAL, ONLY : Mloc,Nloc,MASK,I,J,DX,DY,ZERO,Beta_ref
-     USE GLOBAL, ONLY : SP,PI,Grav,TIME,Amp_Ser,Per_Ser,Phase_Ser,Dep_Ser,&
-                       Theta_Ser, Ibeg,Iend,Jbeg,Jend,&
+     USE GLOBAL, ONLY : Mloc,Nloc,I,J,DX,DY,ZERO,Beta_ref
+     USE GLOBAL, ONLY : SP,PI,Grav,Amp_Ser,Per_Ser,Dep_Ser,&
+                       Theta_Ser, Ibeg,Jbeg,&
                        Wave_Number_Ser,Stokes_Drift_Ser,NumFreq,NumDir,&
                        Segma_Ser,&
                        Cm_eta,Sm_eta,Cm_u,Sm_u,Cm_v,Sm_v,PERIODIC
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : myid,npx,npy,px,py,Mglob,Nglob, &
-	                  iista, jjsta    !ykchoi Jan/23/2018
+     USE GLOBAL, ONLY : iista, jjsta    !ykchoi Jan/23/2018
 # endif
      IMPLICIT NONE
-     INTEGER :: Iter,KK,K,KKK
+     INTEGER :: Iter,KK,KKK
      REAL(SP) :: Celerity,Wave_Length,Fk,Fkdif,Zlev,Fact,X_maker,Y_maker
-     real(SP),DIMENSION(Mloc,Nloc) :: Ein2D,Din2D
-     real(SP),DIMENSION(Mloc,Nloc) :: Uin2D,Vin2D
-     REAL(SP) :: tmp_eta,tmp_u,tmp_v
      REAL(SP) :: Theta_Per
 
 
@@ -1195,15 +1191,14 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm &
 ! *** from data2d_cm_sm
      USE GLOBAL, ONLY : Mloc,Nloc,I,J,DX,DY,ZERO,Beta_ref,PERIODIC
      USE GLOBAL, ONLY : Amp_Ser,Per_Ser,Phase_Ser,Dep_Ser,&
-                       Theta_Ser, Ibeg,Iend,Jbeg,Jend,&
+                       Theta_Ser, Ibeg,Jbeg,&
                        Wave_Number_Ser,Stokes_Drift_Ser,NumFreq,NumDir,&
                        Segma_Ser,WAVE_DATA_TYPE,&
                        Cm_eta,Sm_eta,Cm_u,Sm_u,Cm_v,Sm_v
 ! ***
 
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : myid,npx,npy,px,py,Mglob,Nglob, &
-	                  iista, jjsta   !ykchoi Jan/23/2018
+     USE GLOBAL, ONLY : iista, jjsta   !ykchoi Jan/23/2018
 # endif
 # if defined(INTEL)
      USE IFPORT
@@ -1217,12 +1212,11 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm &
      REAL(SP), DIMENSION(mtheta) :: Hmo_each,AG
      REAL(SP), DIMENSION(10000) :: Ef10000
      REAL(SP) :: Ef,fre,omiga_spec,phi,sigma_spec,Etma,Ef100,Ef_add,sigma_theta,&
-                 theta_p,theta_m,theta_10,theta_11,theta_21,alpha_spec,ap,&
-                 theta,alpha,alpha1,tb,tc,wkn,C_phase,wave_length,rl_gen,rI,theta_1,&
-                 omgn_tmp
-     INTEGER :: kf,kff,kb,N_spec,ktotal,k_n,ktheta,mcenter
-     INTEGER :: Iter,KK,KKK
-     REAL(SP) :: Celerity,Fkdif,Zlev,Fact,X_maker,Y_maker,Theta_Per
+                 alpha_spec,ap,&
+                 theta,alpha,alpha1,tb,tc,wkn,C_phase,wave_length
+     INTEGER :: kf,kff,kb,N_spec,ktotal,k_n,ktheta
+     INTEGER :: KK,KKK
+     REAL(SP) :: Zlev,Fact,X_maker,Y_maker,Theta_Per
      
      REAL(SP) :: sumAG   !ykchoi (11/07/2016)
 
@@ -1277,7 +1271,7 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm &
 ! -- it seems theres an inaccuracy caused by 100 freq if mfreq<100
 !    should change to mfreq 29/10/2012
  
-         Ef100=Ef/REAL(mfreq+1)
+        Ef100=Ef/REAL(mfreq+1)
         kb=0
         do kff=1,mfreq
 
@@ -1298,7 +1292,7 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm &
 100     continue
 
 ! sometimes Freq=0 happens, 02/08/2012
-        IF(Freq(kff).eq.0.0)THEN
+        IF(kff.gt.1.and.Freq(kff).eq.0.0)THEN
            Freq(kff)=Freq(kff-1)
         ENDIF
         enddo
@@ -1308,13 +1302,13 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm &
 ! guarantee to get the final frequency (Freq(mfreq), which results in a random number
 ! fyshi (11/14/2016)
 
-	  IF ( Freq(mfreq) < Freq(mfreq-1) ) THEN
-	      Freq(mfreq) = Freq(mfreq-1)
-	  ENDIF
+        IF ( Freq(mfreq) < Freq(mfreq-1) ) THEN
+            Freq(mfreq) = Freq(mfreq-1)
+        ENDIF
 
 ! --- directional wave
         sigma_theta=sigma_theta_input*pi/180.0_SP
-        N_spec=20.0_SP/sigma_theta
+        N_spec=INT(20.0_SP/sigma_theta)
 
         ktotal=mtheta
 
@@ -1330,7 +1324,7 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm &
         do ktheta=1,mtheta
 
            theta = -pi/3.0_SP + theta_input*pi/180.0_SP  & 
-	             + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)
+                   + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)
 
 !  ----    for users dont know the range
            IF(theta.gt.0.5_SP*pi) theta = 0.5_SP*pi
@@ -1338,15 +1332,15 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm &
 !  ----
 
            AG(ktheta) = 1.0_SP/( 2.0_SP*pi )
-	     do k_n=1,N_spec
-	        AG(ktheta) = AG(ktheta) +   &
+           do k_n=1,N_spec
+              AG(ktheta) = AG(ktheta) +   &
                 ( 1.0_SP/pi )*exp( -0.5_SP*( real(k_n)*sigma_theta )**2 )   &
-	           *cos( k_n*(theta - theta_input*pi/180.0_SP))
-	     enddo
-	     sumAG = sumAG + AG(ktheta)
-	  
-	  enddo
-	  AG(:) = ABS(AG(:)/sumAG);    !Because integral of AG should be 1.
+                 *cos( k_n*(theta - theta_input*pi/180.0_SP))
+           enddo
+           sumAG = sumAG + AG(ktheta)
+        
+        enddo
+        AG(:) = ABS(AG(:)/sumAG);    !Because integral of AG should be 1.
 
       ENDIF ! 1D or not
 
@@ -1380,7 +1374,7 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm &
         theta = theta_input*pi/180.0_SP
       ELSE
         theta = -pi/3.0_SP + theta_input*pi/180.0_SP  & 
-	         + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)   !ykchoi (11/07/2016)
+               + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)   !ykchoi (11/07/2016)
 
 !  ----    for users dont know the range
            IF(theta.gt.0.5_SP*pi) theta = 0.5_SP*pi
@@ -1538,15 +1532,14 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm_EQUAL_DFREQ &
 ! *** from data2d_cm_sm
      USE GLOBAL, ONLY : Mloc,Nloc,I,J,DX,DY,ZERO,Beta_ref,PERIODIC
      USE GLOBAL, ONLY : Amp_Ser,Per_Ser,Phase_Ser,Dep_Ser,&
-                       Theta_Ser, Ibeg,Iend,Jbeg,Jend,&
+                       Theta_Ser, Ibeg,Jbeg,&
                        Wave_Number_Ser,Stokes_Drift_Ser,NumFreq,NumDir,&
                        Segma_Ser,WAVE_DATA_TYPE,&
                        Cm_eta,Sm_eta,Cm_u,Sm_u,Cm_v,Sm_v
 ! ***
 
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : myid,npx,npy,px,py,Mglob,Nglob, &
-	                  iista, jjsta   !ykchoi Jan/23/2018
+     USE GLOBAL, ONLY : iista, jjsta   !ykchoi Jan/23/2018
 # endif
 # if defined(INTEL)
      USE IFPORT
@@ -1559,14 +1552,13 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm_EQUAL_DFREQ &
      REAL(SP),DIMENSION(mfreq):: Freq,omgn,EnergyBin
      REAL(SP), DIMENSION(mtheta,mfreq) :: Hmo_each
      REAL(SP), DIMENSION(mtheta) :: AG
-     REAL(SP), DIMENSION(10000) :: Ef10000
-     REAL(SP) :: Ef,fre,omiga_spec,phi,sigma_spec,Etma,Ef100,Ef_add,sigma_theta,&
-                 theta_p,theta_m,theta_10,theta_11,theta_21,alpha_spec,ap,&
-                 theta,alpha,alpha1,tb,tc,wkn,C_phase,wave_length,rl_gen,rI,theta_1,&
-                 omgn_tmp,df
-     INTEGER :: kf,kff,kb,N_spec,ktotal,k_n,ktheta,mcenter
-     INTEGER :: Iter,KK,KKK
-     REAL(SP) :: Celerity,Fkdif,Zlev,Fact,X_maker,Y_maker,Theta_Per
+     REAL(SP) :: Ef,omiga_spec,phi,sigma_spec,Etma,sigma_theta,&
+                 alpha_spec,ap,&
+                 theta,alpha,alpha1,tb,tc,wkn,C_phase,wave_length,&
+                 df
+     INTEGER :: kf,kff,N_spec,ktotal,k_n,ktheta
+     INTEGER :: KK,KKK
+     REAL(SP) :: Zlev,Fact,X_maker,Y_maker,Theta_Per
      
      REAL(SP) :: sumAG   !ykchoi (11/07/2016)
 
@@ -1618,7 +1610,7 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm_EQUAL_DFREQ &
  
 ! --- directional wave
         sigma_theta=sigma_theta_input*pi/180.0_SP
-        N_spec=20.0_SP/sigma_theta
+        N_spec=INT(20.0_SP/sigma_theta)
 
         ktotal=mtheta
 
@@ -1634,7 +1626,7 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm_EQUAL_DFREQ &
         do ktheta=1,mtheta
 
            theta = -pi/3.0_SP + theta_input*pi/180.0_SP  & 
-	             + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)
+                   + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)
 
 !  ----    for users dont know the range
            IF(theta.gt.0.5_SP*pi) theta = 0.5_SP*pi
@@ -1642,15 +1634,15 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm_EQUAL_DFREQ &
 !  ----
 
            AG(ktheta) = 1.0_SP/( 2.0_SP*pi )
-	     do k_n=1,N_spec
-	        AG(ktheta) = AG(ktheta) +   &
+           do k_n=1,N_spec
+              AG(ktheta) = AG(ktheta) +   &
                 ( 1.0_SP/pi )*exp( -0.5_SP*( real(k_n)*sigma_theta )**2 )   &
-	           *cos( k_n*(theta - theta_input*pi/180.0_SP))
-	     enddo
-	     sumAG = sumAG + AG(ktheta)
-	  
-	  enddo
-	  AG(:) = ABS(AG(:)/sumAG);    !Because integral of AG should be 1.
+                 *cos( k_n*(theta - theta_input*pi/180.0_SP))
+           enddo
+           sumAG = sumAG + AG(ktheta)
+        
+        enddo
+        AG(:) = ABS(AG(:)/sumAG);    !Because integral of AG should be 1.
 
       ENDIF ! 1D or not
 
@@ -1683,7 +1675,7 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm_EQUAL_DFREQ &
         theta = theta_input*pi/180.0_SP
       ELSE
         theta = -pi/3.0_SP + theta_input*pi/180.0_SP  & 
-	         + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)   !ykchoi (11/07/2016)
+               + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)   !ykchoi (11/07/2016)
 
 !  ----    for users dont know the range
            IF(theta.gt.0.5_SP*pi) theta = 0.5_SP*pi
@@ -1838,7 +1830,7 @@ SUBROUTINE WK_WAVEMAKER_IRREGULAR_WAVE &
      USE PARAM
      USE GLOBAL, only : WAVEMAKER
 #  if defined (PARALLEL)
-     USE GLOBAL, only : myid, ier
+     USE GLOBAL, only : myid
 # endif
 # if defined(INTEL)
      USE IFPORT
@@ -1855,10 +1847,10 @@ SUBROUTINE WK_WAVEMAKER_IRREGULAR_WAVE &
      REAL(SP), DIMENSION(mtheta) :: Hmo_each,AG
      REAL(SP), DIMENSION(10000) :: Ef10000
      REAL(SP) :: Ef,fre,omiga_spec,phi,sigma_spec,Etma,Ef100,Ef_add,sigma_theta,&
-                 theta_p,theta_m,theta_10,theta_11,theta_21,alpha_spec,ap,&
-                 theta,alpha,alpha1,tb,tc,wkn,C_phase,wave_length,rl_gen,rI,theta_1,&
+                 alpha_spec,ap,&
+                 theta,alpha,alpha1,tb,tc,wkn,C_phase,wave_length,rl_gen,rI,&
                  omgn_tmp
-     INTEGER :: kf,kff,kb,N_spec,ktotal,k_n,ktheta,mcenter
+     INTEGER :: kf,kff,kb,N_spec,ktotal,k_n,ktheta
 
      REAL(SP) :: sumAG   !ykchoi (11/07/2016)
 
@@ -1898,7 +1890,7 @@ SUBROUTINE WK_WAVEMAKER_IRREGULAR_WAVE &
 
         kb=0
         
-	  do kff=1,mfreq
+        do kff=1,mfreq
 
         Ef_add=0.0_SP
         do k=kb+1,10000
@@ -1917,20 +1909,20 @@ SUBROUTINE WK_WAVEMAKER_IRREGULAR_WAVE &
 100     continue
 
 ! sometimes Freq=0 happens, 02/08/2012
-        IF(Freq(kff).eq.0.0)THEN
+        IF(kff.gt.1.and.Freq(kff).eq.0.0)THEN
            Freq(kff)=Freq(kff-1)
         ENDIF
-	  
+
         enddo
 
 ! sometimes Freq(mfreq) < Freq(mfreq-1) happens, ykchoi (11/07/2016)
-	  IF ( Freq(mfreq) < Freq(mfreq-1) ) THEN
-	      Freq(mfreq) = Freq(mfreq-1)
-	  ENDIF
+        IF ( Freq(mfreq) < Freq(mfreq-1) ) THEN
+            Freq(mfreq) = Freq(mfreq-1)
+        ENDIF
 
 ! --- directional wave
         sigma_theta=sigma_theta_input*pi/180.0_SP
-        N_spec=20.0_SP/sigma_theta
+        N_spec=INT(20.0_SP/sigma_theta)
 
         ktotal=mtheta
 
@@ -1943,7 +1935,7 @@ SUBROUTINE WK_WAVEMAKER_IRREGULAR_WAVE &
        do ktheta=1,mtheta
 
           theta = -pi/3.0_SP + theta_input*pi/180.0_SP  & 
-	           + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)
+                 + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)
 
 !  ----    for users dont know the range
            IF(theta.gt.0.5_SP*pi) theta = 0.5_SP*pi
@@ -1951,15 +1943,15 @@ SUBROUTINE WK_WAVEMAKER_IRREGULAR_WAVE &
 !  ----
 
           AG(ktheta) = 1.0_SP/( 2.0_SP*pi )
-	    do k_n=1,N_spec
-	       AG(ktheta) = AG(ktheta) +  & 
+          do k_n=1,N_spec
+             AG(ktheta) = AG(ktheta) +  & 
                 ( 1.0_SP/pi )*exp( -0.5_SP*( real(k_n)*sigma_theta )**2 )  &
-	        *cos( k_n*(theta - theta_input*pi/180.0_SP) )
-	    enddo
-	    sumAG = sumAG + AG(ktheta);
-	  
-	 enddo
-	 AG(:) = ABS(AG(:)/sumAG);   !Because integral of AG should be 1.
+              *cos( k_n*(theta - theta_input*pi/180.0_SP) )
+          enddo
+          sumAG = sumAG + AG(ktheta);
+        
+       enddo
+       AG(:) = ABS(AG(:)/sumAG);   !Because integral of AG should be 1.
 
 
       ENDIF ! 1D or not
@@ -1983,7 +1975,7 @@ SUBROUTINE WK_WAVEMAKER_IRREGULAR_WAVE &
          ap=Hmo_each(ktheta)/SQRT(2.0_SP)/2.0_SP
 !        ap=Hmo_each(ktheta)/2.0_SP  ! this is the one suggested by Geiman
         
-!	  theta=-pi/3.0_SP+theta_input*pi/180.0_SP+2.0_SP/3.0_SP*pi/ktotal*ktheta
+!        theta=-pi/3.0_SP+theta_input*pi/180.0_SP+2.0_SP/3.0_SP*pi/ktotal*ktheta
 
 !ykchoi(11/07/16)
 ! yes, this statement makes a distribution symmetric, checked by fyshi(11/14/2016)
@@ -1993,7 +1985,7 @@ SUBROUTINE WK_WAVEMAKER_IRREGULAR_WAVE &
         theta = theta_input*pi/180.0_SP
       ELSE
         theta = -pi/3.0_SP + theta_input*pi/180.0_SP &
-	         + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)  
+               + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)  
 
 !  ----    for users dont know the range
            IF(theta.gt.0.5_SP*pi) theta = 0.5_SP*pi
@@ -2089,7 +2081,7 @@ SUBROUTINE WK_WAVEMAKER_IRREGULAR_WAVE &
 
         enddo ! end kf
         enddo ! end ktheta
-	  
+        
 
 ! calculate wavemaker width
         omgn_tmp=2.0_SP*pi*fm
@@ -2131,7 +2123,7 @@ SUBROUTINE WK_EQUAL_DFREQ_IRREGULAR_WAVE &
      USE PARAM
      USE GLOBAL, only : WAVEMAKER
 #  if defined (PARALLEL)
-     USE GLOBAL, only : myid, ier
+     USE GLOBAL, only : myid
 # endif
 # if defined(INTEL)
      USE IFPORT
@@ -2147,12 +2139,11 @@ SUBROUTINE WK_EQUAL_DFREQ_IRREGULAR_WAVE &
      REAL(SP),DIMENSION(mfreq):: Freq,EnergyBin
      REAL(SP), DIMENSION(mtheta) :: AG
      REAL(SP), DIMENSION(mtheta,mfreq) :: Hmo_each
-     REAL(SP), DIMENSION(10000) :: Ef10000
-     REAL(SP) :: Ef,fre,omiga_spec,phi,sigma_spec,Etma,Ef100,Ef_add,sigma_theta,&
-                 theta_p,theta_m,theta_10,theta_11,theta_21,alpha_spec,ap,&
-                 theta,alpha,alpha1,tb,tc,wkn,C_phase,wave_length,rl_gen,rI,theta_1,&
+     REAL(SP) :: Ef,omiga_spec,phi,sigma_spec,Etma,sigma_theta,&
+                 alpha_spec,ap,&
+                 theta,alpha,alpha1,tb,tc,wkn,C_phase,wave_length,rl_gen,rI,&
                  omgn_tmp,df
-     INTEGER :: kf,kff,kb,N_spec,ktotal,k_n,ktheta,mcenter
+     INTEGER :: kf,kff,N_spec,ktotal,k_n,ktheta
 
      REAL(SP) :: sumAG   !ykchoi (11/07/2016)
 
@@ -2184,7 +2175,7 @@ SUBROUTINE WK_EQUAL_DFREQ_IRREGULAR_WAVE &
 
 ! --- directional wave
         sigma_theta=sigma_theta_input*pi/180.0_SP
-        N_spec=20.0_SP/sigma_theta
+        N_spec=INT(20.0_SP/sigma_theta)
 
         ktotal=mtheta
 
@@ -2197,7 +2188,7 @@ SUBROUTINE WK_EQUAL_DFREQ_IRREGULAR_WAVE &
        do ktheta=1,mtheta
 
           theta = -pi/3.0_SP + theta_input*pi/180.0_SP  & 
-	           + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)
+                 + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)
 
 !  ----    for users dont know the range
            IF(theta.gt.0.5_SP*pi) theta = 0.5_SP*pi
@@ -2205,15 +2196,15 @@ SUBROUTINE WK_EQUAL_DFREQ_IRREGULAR_WAVE &
 !  ----
 
           AG(ktheta) = 1.0_SP/( 2.0_SP*pi )
-	    do k_n=1,N_spec
-	       AG(ktheta) = AG(ktheta) +  & 
+          do k_n=1,N_spec
+             AG(ktheta) = AG(ktheta) +  & 
                 ( 1.0_SP/pi )*exp( -0.5_SP*( real(k_n)*sigma_theta )**2 )  &
-	        *cos( k_n*(theta - theta_input*pi/180.0_SP) )
-	    enddo
-	    sumAG = sumAG + AG(ktheta);
-! print*,theta*180/pi,AG(ktheta) ! check negative	  
-	 enddo
-	 AG(:) = ABS(AG(:)/sumAG);   !Because integral of AG should be 1.
+              *cos( k_n*(theta - theta_input*pi/180.0_SP) )
+          enddo
+          sumAG = sumAG + AG(ktheta);
+! print*,theta*180/pi,AG(ktheta) ! check negative
+       enddo
+       AG(:) = ABS(AG(:)/sumAG);   !Because integral of AG should be 1.
 
 ! small AG could be negative 04/13/2018
 
@@ -2239,7 +2230,7 @@ SUBROUTINE WK_EQUAL_DFREQ_IRREGULAR_WAVE &
         theta = theta_input*pi/180.0_SP
       ELSE
         theta = -pi/3.0_SP + theta_input*pi/180.0_SP &
-	         + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)   
+               + 2.0_SP/3.0_SP*pi/(real(ktotal)-1.0_SP)*(real(ktheta)-1.0_SP)   
 
 !  ----    for users dont know the range
            IF(theta.gt.0.5_SP*pi) theta = 0.5_SP*pi
@@ -2485,8 +2476,7 @@ SUBROUTINE VISCOSITY_WMAKER (M,N,ETAT,visbrk,H,MinDepthFrc,DX,DY)
      USE GLOBAL,ONLY : Depth,nu_break,ETA,Nghost,Xc_WK,Yc_WK,Ibeg,&
                        Jbeg,Width_WK,Xc_WK,Yc_WK,Ywidth_WK,WAVEMAKER_visbrk,nu_bkg
 # if defined(PARALLEL)
-     USE GLOBAL,ONLY : npx,npy, &
-	                 iista,jjsta    !ykchoi Jan/23/2018
+     USE GLOBAL,ONLY : iista,jjsta    !ykchoi Jan/23/2018
 # endif
      IMPLICIT NONE
      INTEGER,INTENT(IN) :: M,N
@@ -2509,10 +2499,10 @@ SUBROUTINE VISCOSITY_WMAKER (M,N,ETAT,visbrk,H,MinDepthFrc,DX,DY)
 
 # if defined (CARTESIAN)
         DXg=DX
-		DYg=DY
+            DYg=DY
 # else
-		DXg=DX(I,J)
-		DYg=DY(I,J)
+            DXg=DX(I,J)
+            DYg=DY(I,J)
 # endif
 
 ! set viscosity
@@ -2521,8 +2511,8 @@ SUBROUTINE VISCOSITY_WMAKER (M,N,ETAT,visbrk,H,MinDepthFrc,DX,DY)
 ![---ykchoi Jan/23/2018
 !        xmk=(I-Ibeg)*DXg+npx*(M-2*Nghost)*DXg
 !        ymk=(J-Jbeg)*DYg+npy*(N-2*Nghost)*DYg
-	      xmk=(I-Ibeg)*DXg + (iista-1)*DXg
-	      ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
+            xmk=(I-Ibeg)*DXg + (iista-1)*DXg
+            ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
 !---ykchoi Jan/23/2018]
 # else
         xmk=(I-Ibeg)*DXg
@@ -2558,23 +2548,20 @@ END SUBROUTINE VISCOSITY_WMAKER
 !-------------------------------------------------------------------------------------
 SUBROUTINE IRREGULAR_LEFT_BC
      USE PARAM
-     USE GLOBAL, ONLY : ETA,U,V,SPONGEMAKER,Mloc,Nloc,Nghost,MASK,I,J,DX,DY,ZERO, &
+     USE GLOBAL, ONLY : ETA,U,V,Mloc,Nloc,Nghost,I,J,ZERO, &
                         Depth,HU,HV
      USE GLOBAL, ONLY : SP,PI,Grav,TIME,ISTAGE,DT,NumFreq,Phase_Ser,&
-                       Ibeg,Iend,Jbeg,Jend,&
-                       Segma_Ser,Stokes_Drift_Ser,Cm_eta,Sm_eta,&
-                       Cm_u,Sm_u,Cm_v,Sm_v,SPONGE
+                       Segma_Ser,Cm_eta,Sm_eta,&
+                       Cm_u,Sm_u,Cm_v,Sm_v
 # if defined (PARALLEL)
-    USE GLOBAL, ONLY : n_east,n_west,n_suth,n_nrth, &
-                     comm2d, ier,myid,PX,PY,&
-                       NumberProcessor,ProcessorID
+    USE GLOBAL, ONLY : n_west
 # endif
 
 
      IMPLICIT NONE
      REAL(SP) :: RTIME
      INTEGER :: KK
-     real(SP),DIMENSION(Mloc,Nloc) :: Ein2D,Din2D
+     real(SP),DIMENSION(Mloc,Nloc) :: Ein2D
      real(SP),DIMENSION(Mloc,Nloc) :: Uin2D,Vin2D
 
 
@@ -2639,22 +2626,22 @@ SUBROUTINE WK_NEW_WAVEMAKER_2D_SPECTRAL_DATA &
     USE PARAM
     USE GLOBAL, ONLY : PERIODIC,DY,Nglob
 # if defined (PARALLEL)
-    USE GLOBAL,ONLY : myid,ier
+    USE GLOBAL,ONLY : myid
 # endif
     IMPLICIT NONE
     INTEGER,INTENT(IN) :: NumFreq,NumDir
     REAL(SP) :: alpha,alpha1,omgn,tb,tc,wkn,C_phase,wave_length,&
         rl_gen,rI,Theta_temp,Tperiod,AMP_WK,omgn_tmp
     REAL(SP),DIMENSION(NumFreq,1), INTENT(OUT) :: D_gen,beta_gen,rlamda
-    REAL(SP),DIMENSION(NumFreq,1) :: Dir2D
     REAL(SP),INTENT(OUT) :: width
     REAL(SP),DIMENSION(NumFreq),INTENT(IN) :: Freq,Phase2D
     REAL(SP),DIMENSION(NumFreq),INTENT(IN) :: DireD
     REAL(SP),DIMENSION(NumFreq) :: Dire
     REAL(SP),DIMENSION(NumFreq,1),INTENT(IN) :: WAVE_COMP
     REAL(SP),INTENT(IN) :: H_gen,delta,PeakPeriod
-    INTEGER :: nfre,ndir
-    REAL(SP) :: angle1,angle2,Hmo_output
+    INTEGER :: nfre
+    REAL(SP) :: Hmo_output
+    nop(NumDir)
 
     ! change degree to radian
     Dire=DireD*DEG2RAD
@@ -2815,9 +2802,8 @@ SUBROUTINE WK_NEW_EQUAL_DFREQ_IRREGULAR_WAVE &
     Periodic,DY,Nglob,Freq,alpha_c)
 
     USE PARAM
-    USE GLOBAL, only : WAVEMAKER
 #  if defined (PARALLEL)
-    USE GLOBAL, only : myid, ier
+    USE GLOBAL, only : myid
 # endif
 # if defined(INTEL)
     USE IFPORT
@@ -2834,11 +2820,11 @@ SUBROUTINE WK_NEW_EQUAL_DFREQ_IRREGULAR_WAVE &
     REAL(SP), DIMENSION(1,mfreq) :: Hmo_each
     REAL(SP),DIMENSION(mfreq,1),INTENT(OUT) :: D_gen,phi1,rlamda
     REAL(SP),DIMENSION(mfreq),INTENT(OUT) :: beta_gen,omgn
-    REAL(SP) :: Ef,fre,omiga_spec,phi,sigma_spec,Ef100,Ef_add,sigma_theta,&
-                    theta_p,theta_m,theta_10,theta_11,theta_21,alpha_spec,ap,&
+    REAL(SP) :: Ef,omiga_spec,phi,sigma_spec,sigma_theta,&
+                    alpha_spec,ap,&
                     alpha,alpha1,tb,tc,wkn,C_phase,wave_length,rl_gen,rI,&
-                    theta_1,omgn_tmp,df,correction_coeff,ktheta_temp,Theta_temp
-    INTEGER :: kf,kff,kb,N_spec,ktotal,k_n,ktheta,mcenter
+                    omgn_tmp,df,correction_coeff,ktheta_temp,Theta_temp
+    INTEGER :: kf,N_spec,k_n
     INTEGER, DIMENSION(mfreq) :: displace_theta
     INTEGER :: idx_theta
     ! inclusion of wave coherency
@@ -2854,7 +2840,7 @@ SUBROUTINE WK_NEW_EQUAL_DFREQ_IRREGULAR_WAVE &
 
     ! --- directional wave
     sigma_theta=sigma_theta_input*pi/180.0_SP
-    N_spec=20.0_SP/sigma_theta
+    N_spec=INT(20.0_SP/sigma_theta)
 
     IF(mtheta==1) THEN ! 1D case
         theta(1) = theta_input*pi/180.0_SP
@@ -2875,7 +2861,7 @@ SUBROUTINE WK_NEW_EQUAL_DFREQ_IRREGULAR_WAVE &
             do k_n=1,N_spec
                 AG(kf) = AG(kf)+ &
                     (1.0_SP/pi)*exp(-0.5_SP*(real(k_n)*sigma_theta)**2) &
-  	                *cos(k_n*(theta(kf)-theta_input*pi/180.0_SP))
+                        *cos(k_n*(theta(kf)-theta_input*pi/180.0_SP))
             enddo
         ENDDO
         AG(:) = ABS(AG(:))
@@ -3047,10 +3033,10 @@ SUBROUTINE CALCULATE_NEW_Cm_Sm(M,N,DX,DY,Xc,Ibeg,Jbeg,mfreq,mtheta,D_gen,&
     phi1,width,rlamda,beta_gen,Cm,Sm)
 
     USE PARAM
+    USE GLOBAL, ONLY : loop_index,Freq !Chen, Salatin
 # if defined (PARALLEL)
-    USE GLOBAL, ONLY : myid,npx,npy,px,py,Mglob,Nglob, &
-        iista,jjsta,&   !ykchoi Jan/23/2018
-        loop_index,Freq !Chen, Salatin
+    USE GLOBAL, ONLY : myid, &
+        iista,jjsta   !ykchoi Jan/23/2018
 # endif
     IMPLICIT NONE
     INTEGER,INTENT(IN) :: M,N,mfreq,mtheta,Ibeg,Jbeg
@@ -3058,8 +3044,10 @@ SUBROUTINE CALCULATE_NEW_Cm_Sm(M,N,DX,DY,Xc,Ibeg,Jbeg,mfreq,mtheta,D_gen,&
     REAL(SP),DIMENSION(mfreq,1),INTENT(IN) :: D_gen,phi1,rlamda
     REAL(SP),DIMENSION(mfreq),INTENT(IN) :: beta_gen
     REAL(SP),DIMENSION(M,N,mfreq),INTENT(OUT) :: Cm,Sm
-    INTEGER::kf,ktheta
+    INTEGER::kf
     INTEGER::temp_index,kf_temp,kkk
+    nop(width)
+    nop(mtheta)
 
     temp_index = 1
     DO kf = 2,mfreq
@@ -3179,10 +3167,6 @@ END SUBROUTINE CALCULATE_NEW_Cm_Sm
 SUBROUTINE WAVE_COHERENCE(alpha_c,Freq,mfreq,mtheta,idx_theta)
 
     USE PARAM
-    USE GLOBAL, only : WAVEMAKER
-#  if defined (PARALLEL)
-    USE GLOBAL, only : myid, ier
-# endif
 # if defined(INTEL)
     USE IFPORT
 # endif
@@ -3205,27 +3189,32 @@ SUBROUTINE WAVE_COHERENCE(alpha_c,Freq,mfreq,mtheta,idx_theta)
         repetitions(kf) = 1
     ENDDO
     ! number of coherence waves
-    Num_Coherent = alpha_c/100.0_SP*mfreq
+    Num_Coherent = INT(alpha_c/100.0_SP*mfreq)
     ! in host frequency indices, which is the index of frequencies that
     ! can be host, first element cannot be zero, and last element should be
     ! equal to mfreq
     IF(idx_theta.EQ.0)THEN
-        host_freqs_idx = [(host_freq_idx, host_freq_idx=idx_theta+mtheta,&
+        ALLOCATE(host_freqs_idx(1+(mfreq-mtheta)/mtheta))
+        host_freqs_idx = [(host_freq_idx, host_freq_idx=mtheta,&
         mfreq,mtheta)]
     ELSE
+        ALLOCATE(host_freqs_idx(1+(mfreq-idx_theta)/mtheta))
         host_freqs_idx = &
             [(host_freq_idx, host_freq_idx=idx_theta,mfreq,mtheta)]
     ENDIF
     IF(host_freqs_idx(size(host_freqs_idx)).NE.mfreq)THEN
         DEALLOCATE(host_freqs_idx)
         IF(idx_theta.EQ.0)THEN
-            host_freqs_idx = (/ (host_freq_idx, host_freq_idx=idx_theta+&
-                mtheta,mfreq,mtheta),mfreq /)
+            ALLOCATE(host_freqs_idx(2+(mfreq-mtheta)/mtheta))
+            host_freqs_idx = (/ (host_freq_idx, host_freq_idx=mtheta,&
+                mfreq,mtheta),mfreq /)
         ELSE
+            ALLOCATE(host_freqs_idx(2+(mfreq-idx_theta)/mtheta))
             host_freqs_idx = (/ (host_freq_idx, host_freq_idx=idx_theta,&
                 mfreq,mtheta),mfreq /)
         ENDIF
     ENDIF
+    ALLOCATE(host_freqs(SIZE(host_freqs_idx)))
     host_freqs = Freq(host_freqs_idx)
     ! pool of frequencies which can be selected as coherent waves
     ! this pool excludes the host freqs
@@ -3289,6 +3278,7 @@ SUBROUTINE WAVE_COHERENCE(alpha_c,Freq,mfreq,mtheta,idx_theta)
         Num_Coherent_temp = COUNT(repetitions.GT.1)
     ENDDO
     Freq = Freq_temp
-    !DEALLOCATE(host_freqs_idx,temp_idx,host_freqs,candidate_freq_pool,&
+    DEALLOCATE(host_freqs_idx,host_freqs)
+    !DEALLOCATE(temp_idx,candidate_freq_pool,&
     !    candidate_freq_pool_temp,freq_diff) ! deallocate some variables
 END SUBROUTINE WAVE_COHERENCE

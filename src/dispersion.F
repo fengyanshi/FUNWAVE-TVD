@@ -63,12 +63,13 @@ SUBROUTINE CAL_DISPERSION
      USE GLOBAL
      IMPLICIT NONE
 
-     REAL(SP),Dimension(Mloc,Nloc) :: DU,DV,DUt,DVt
+     REAL(SP),Dimension(Mloc,Nloc) :: DU,DV
+# if defined (CARTESIAN)
      REAL(SP) :: UxxVxy,UxyVyy,HUxxHVxy,HUxyHVyy, &
                  UxxVxy_x,UxxVxy_y,UxyVyy_x,UxyVyy_y, &
                  HUxxHVxy_x,HUxxHVxy_y,HUxyHVyy_x,HUxyHVyy_y, &
                  rh,rhx,rhy,reta,ken1,ken2,ken3,ken4,ken5
-# if defined (CARTESIAN)
+     REAL(SP),Dimension(Mloc,Nloc) :: DUt,DVt
      REAL(SP) :: omega_0,omega_1
      REAL(SP),Dimension(Mloc,Nloc) :: omega            
 # endif
@@ -133,8 +134,8 @@ SUBROUTINE CAL_DISPERSION
        DO J=1,Nloc
        DO I=1,Mloc
 
-	  Ut(I,J) = (U(I,J)-U0(I,J)) / DT   !ykchoi
-	  Vt(I,J) = (V(I,J)-V0(I,J)) / DT   !ykchoi
+        Ut(I,J) = (U(I,J)-U0(I,J)) / DT   !ykchoi
+        Vt(I,J) = (V(I,J)-V0(I,J)) / DT   !ykchoi
 
         DUt(I,J)=Max(Depth(I,J),MinDepthFrc)*Ut(I,J)
         DVt(I,J)=Max(Depth(I,J),MinDepthFrc)*Vt(I,J)
@@ -296,23 +297,23 @@ SUBROUTINE CAL_DISPERSION
 
        !------[ykchoi (04/14/2017)
        IF(gamma2>ZERO)THEN
-	   UxxVxy = Uxx(I,J) + Vxy(I,J)
-	   UxyVyy = Uxy(I,J) + Vyy(I,J)
+         UxxVxy = Uxx(I,J) + Vxy(I,J)
+         UxyVyy = Uxy(I,J) + Vyy(I,J)
 
-	   HUxxHVxy = DUxx(I,J) + DVxy(I,J)
-	   HUxyHVyy = DUxy(I,J) + DVyy(I,J)
+         HUxxHVxy = DUxx(I,J) + DVxy(I,J)
+         HUxyHVyy = DUxy(I,J) + DVyy(I,J)
 
-	   rh = Depth(I,J)
-	   reta = Eta(I,J)
+         rh = Depth(I,J)
+         reta = Eta(I,J)
 
-  	   ken1 = ( 1.0_SP/6.0_SP - Beta_1 + Beta_1*Beta_1 )*rh*reta*Beta_2   &
-	         + ( 1.0_SP/2.0_SP*Beta_1*Beta_1 - 1.0_SP/6.0_SP )*reta*reta*Beta_2*Beta_2
-	   ken2 = ( Beta_1 - 1.0_SP/2.0_SP )*reta*Beta_2
+         ken1 = ( 1.0_SP/6.0_SP - Beta_1 + Beta_1*Beta_1 )*rh*reta*Beta_2   &
+               + ( 1.0_SP/2.0_SP*Beta_1*Beta_1 - 1.0_SP/6.0_SP )*reta*reta*Beta_2*Beta_2
+         ken2 = ( Beta_1 - 1.0_SP/2.0_SP )*reta*Beta_2
 
-	   U4(I,J) = U4(I,J) + gamma2*MASK9(I,J)*( ken1*UxxVxy + ken2*HUxxHVxy )
-	   V4(I,J) = V4(I,J) + gamma2*MASK9(I,J)*( ken1*UxyVyy + ken2*HUxyHVyy )
-	 ENDIF
-	 !------ykchoi (04/14/2017)]
+         U4(I,J) = U4(I,J) + gamma2*MASK9(I,J)*( ken1*UxxVxy + ken2*HUxxHVxy )
+         V4(I,J) = V4(I,J) + gamma2*MASK9(I,J)*( ken1*UxyVyy + ken2*HUxyHVyy )
+       ENDIF
+       !------ykchoi (04/14/2017)]
 # endif
 
 # if defined (ZALPHA)
@@ -330,19 +331,19 @@ SUBROUTINE CAL_DISPERSION
                
 # if defined (CARTESIAN)
        !U1p(I,J)=0.5_SP*(1.0_SP-Beta_1)  & !ykchoi
-	 U1p(I,J)=0.5_SP*(1.0_SP-Beta_1)*(1.0_SP-Beta_1)  &
+       U1p(I,J)=0.5_SP*(1.0_SP-Beta_1)*(1.0_SP-Beta_1)  &
                 *DEPTH(I,J)*DEPTH(I,J)  &
                 *(Uxx(I,J)+Vxy(I,J)) &
                +(Beta_1-1.0_SP)*DEPTH(I,J)*(DUxx(I,J)+DVxy(I,J))
        
-	 !V1p(I,J)=0.5_SP*(1.0_SP-Beta_1)  & !ykchoi
-	 V1p(I,J)=0.5_SP*(1.0_SP-Beta_1)*(1.0_SP-Beta_1)  &
+       !V1p(I,J)=0.5_SP*(1.0_SP-Beta_1)  & !ykchoi
+       V1p(I,J)=0.5_SP*(1.0_SP-Beta_1)*(1.0_SP-Beta_1)  &
                 *DEPTH(I,J)*DEPTH(I,J)  &
                 *(Uxy(I,J)+Vyy(I,J)) &
                +(Beta_1-1.0_SP)*DEPTH(I,J)*(DUxy(I,J)+DVyy(I,J))
 # else
        !U1p(I,J)=0.5_SP*(1.0_SP-Beta_1)  & !ykchoi
-	 U1p(I,J)=0.5_SP*(1.0_SP-Beta_1)*(1.0_SP-Beta_1)  &
+       U1p(I,J)=0.5_SP*(1.0_SP-Beta_1)*(1.0_SP-Beta_1)  &
                 *DEPTH(I,J)*DEPTH(I,J)*(Uxx(I,J)+Vxy(I,J)) &
                +(Beta_1-1.0_SP)*DEPTH(I,J)*(DUxx(I,J)+DVxy(I,J))
 
@@ -409,15 +410,15 @@ SUBROUTINE CAL_DISPERSION
         V1pp(I,J)=-reta*Beta_2*ETAy(I,J)*Beta_2*(Utx(I,J)+Vty(I,J)) - 0.5_SP*reta*reta*Beta_2*Beta_2*(Utxy(I,J)+Vtyy(I,J))&
                   -ETAy(I,J)*Beta_2*(DUtx(I,J)+DVty(I,J)) -reta*Beta_2*(DUtxy(I,J)+DVtyy(I,J))
         
-	  !ykchoi (2015. 08.06.)
-	  !remaining terms in U1p, V1p in Shi et al. (2012) publication   
-	  ken1 = Beta_1*( 1.0_SP - Beta_1 )*rh*ETAT(I,J)*Beta_2 - Beta_1*Beta_1*reta*Beta_2*ETAT(I,J)*Beta_2
-	  ken2 = Beta_1*( 1.0_SP - Beta_1 )*rh*reta*Beta_2 - 0.5*Beta_1*Beta_1*reta*reta*Beta_2*Beta_2
-	  ken3 = Beta_1*ETAT(I,J)*Beta_2
-	  ken4 = Beta_1*reta*Beta_2
+        !ykchoi (2015. 08.06.)
+        !remaining terms in U1p, V1p in Shi et al. (2012) publication   
+        ken1 = Beta_1*( 1.0_SP - Beta_1 )*rh*ETAT(I,J)*Beta_2 - Beta_1*Beta_1*reta*Beta_2*ETAT(I,J)*Beta_2
+        ken2 = Beta_1*( 1.0_SP - Beta_1 )*rh*reta*Beta_2 - 0.5*Beta_1*Beta_1*reta*reta*Beta_2*Beta_2
+        ken3 = Beta_1*ETAT(I,J)*Beta_2
+        ken4 = Beta_1*reta*Beta_2
 
-	  U1pp(I,J) = U1pp(I,J) - ken1*UxxVxy - ken2*( Utxx(I,J)+Vtxy(I,J) ) + ken3*HUxxHVxy + ken4*(DUtxx(I,J)+DVtxy(I,J))
-	  V1pp(I,J) = V1pp(I,J) - ken1*UxyVyy - ken2*( Utxy(I,J)+Vtyy(I,J) ) + ken3*HUxyHVyy + ken4*(DUtxy(I,J)+DVtyy(I,J))
+        U1pp(I,J) = U1pp(I,J) - ken1*UxxVxy - ken2*( Utxx(I,J)+Vtxy(I,J) ) + ken3*HUxxHVxy + ken4*(DUtxx(I,J)+DVtxy(I,J))
+        V1pp(I,J) = V1pp(I,J) - ken1*UxyVyy - ken2*( Utxy(I,J)+Vtyy(I,J) ) + ken3*HUxyHVyy + ken4*(DUtxy(I,J)+DVtyy(I,J))
 
          ken1=(Beta_1-1.0_SP)*(rhx+ETAx(I,J))*Beta_2
          ken2=(Beta_1-1.0_SP)*(rh+reta)*Beta_2
@@ -439,7 +440,7 @@ SUBROUTINE CAL_DISPERSION
                    *(HUxxHVxy+ETAx(I,J)*Beta_2*(Ux(I,J)+Vy(I,J))+reta*Beta_2*UxxVxy)
 
         ! ykchoi (15. 08. 06.)
-	  ! ken1 should be modified as following term.
+        ! ken1 should be modified as following term.
         ken1=(Beta_1-1.0_SP)*(rhy+ETAy(I,J))*Beta_2
 
         V2(I,J)=ken1*(U(I,J)*HUxxHVxy+V(I,J)*HUxyHVyy) &
@@ -459,7 +460,7 @@ SUBROUTINE CAL_DISPERSION
         omega_1=( b2*rhx + Beta_1*ETAx(I,J) )*Beta_2*( HUxyHVyy + (b2*rh+Beta_1*reta)*Beta_2*UxyVyy )  &
               - ( b2*rhy + Beta_1*ETAy(I,J) )*Beta_2*( HUxxHVxy + (b2*rh+Beta_1*reta)*Beta_2*UxxVxy )
 
-	omega(I,J)=omega_0+omega_1
+      omega(I,J)=omega_0+omega_1
 
         IF(OUT_VORmax) THEN
         IF(abs(omega(I,J)).GT.VorticityMax(I,J)) THEN
@@ -477,8 +478,8 @@ SUBROUTINE CAL_DISPERSION
                    +ken2*UxyVyy)
 ! ykchoi
 
-	 V3(I,J) = U(I,J)*omega_1 + omega_0 &
-	            *(ken1*HUxxHVxy &
+       V3(I,J) = U(I,J)*omega_1 + omega_0 &
+                  *(ken1*HUxxHVxy &
                     +ken2*UxxVxy)
 ! ykchoi
        ENDDO

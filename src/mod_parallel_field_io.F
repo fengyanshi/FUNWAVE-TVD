@@ -67,7 +67,7 @@ SUBROUTINE PutFileASCII(FILE,PHI)
       !INTEGER :: l
       ! could be max. procs
       !INTEGER,DIMENSION(NumberProcessor) :: npxs,npys
-	!REAL(SP),DIMENSION(NumberProcessor) :: xx
+      !REAL(SP),DIMENSION(NumberProcessor) :: xx
      INTEGER :: irank, lenx, leny, lenxy, ireq
      INTEGER, ALLOCATABLE :: iistas(:), iiends(:), jjstas(:), jjends(:)
      INTEGER :: istatus(mpi_status_size)
@@ -111,30 +111,30 @@ SUBROUTINE PutFileASCII(FILE,PHI)
                       0, MPI_COMM_WORLD, ier )
       
      if( myid == 0 ) then
-	 PHIGLOB( iista:iiend, jjsta:jjend ) = LocalPHI
+       PHIGLOB( iista:iiend, jjsta:jjend ) = LocalPHI
      endif
 
-     do irank=1, px*py-1  	  
-	  
-	  if( myid == 0 ) then
-	    lenx = iiends(irank+1) - iistas(irank+1) + 1 
-	    leny = jjends(irank+1) - jjstas(irank+1) + 1
-	    lenxy = lenx*leny
-	    allocate( xx(lenx, leny) )
-	  
-	    call mpi_irecv( xx, lenxy, mpi_sp, irank, 1, mpi_comm_world, ireq, ier )
-	    call mpi_wait( ireq, istatus, ier )
-	    
-		PHIGLOB( iistas(irank+1):iiends(irank+1), jjstas(irank+1):jjends(irank+1) ) = xx
-		deallocate( xx )
+     do irank=1, px*py-1
+
+        if( myid == 0 ) then
+          lenx = iiends(irank+1) - iistas(irank+1) + 1 
+          leny = jjends(irank+1) - jjstas(irank+1) + 1
+          lenxy = lenx*leny
+          allocate( xx(lenx, leny) )
+
+          call mpi_irecv( xx, lenxy, mpi_sp, irank, 1, mpi_comm_world, ireq, ier )
+          call mpi_wait( ireq, istatus, ier )
+          
+            PHIGLOB( iistas(irank+1):iiends(irank+1), jjstas(irank+1):jjends(irank+1) ) = xx
+            deallocate( xx )
 
         elseif( myid == irank ) then
-	    
-		lenxy = ( iiend-iista+1 )*( jjend-jjsta+1 )
-	    call mpi_isend( LocalPHI, lenxy, mpi_sp, 0, 1, mpi_comm_world, ireq, ier )
-	    call mpi_wait( ireq, istatus, ier )
+          
+            lenxy = ( iiend-iista+1 )*( jjend-jjsta+1 )
+          call mpi_isend( LocalPHI, lenxy, mpi_sp, 0, 1, mpi_comm_world, ireq, ier )
+          call mpi_wait( ireq, istatus, ier )
 
-        endif	  
+        endif
 
      enddo
 
@@ -142,9 +142,9 @@ SUBROUTINE PutFileASCII(FILE,PHI)
 
      if (myid.eq.0) then
         OPEN(1,FILE=TRIM(FILE))
-	  DO J=1,NGlob,OUTPUT_RES
-	     WRITE(1,FORMAT_LEN)(real(PHIGLOB(I,J)),I=1,MGlob,OUTPUT_RES)
-	  ENDDO
+        DO J=1,NGlob,OUTPUT_RES
+           WRITE(1,FORMAT_LEN)(real(PHIGLOB(I,J)),I=1,MGlob,OUTPUT_RES)
+        ENDDO
         !DO J=Nghost+1,NGlob+NGhost,OUTPUT_RES
         !   WRITE(1,FORMAT_LEN)(real(PHIGLOB(I,J)),I=Nghost+1,MGlob+Nghost,OUTPUT_RES)
         !ENDDO
@@ -163,9 +163,8 @@ SUBROUTINE PutFileBinary(FILE_NAME,PHI)
      IMPLICIT NONE
      CHARACTER(LEN=80), INTENT(IN) :: FILE_NAME
      REAL(SP),DIMENSION(Mloc,Nloc), INTENT(IN) :: PHI
-     REAL(SP),DIMENSION(Mloc,Nloc) :: PHITEST
 
-     INTEGER ::  file_handler, ierr , istatus  , mem_type_loc , file_type_glob
+     INTEGER ::  file_handler, ierr , mem_type_loc , file_type_glob
      INTEGER(8) :: offset
      INTEGER , DIMENSION(ndims) ::  sizes_loc , subsizes_loc , start_index_loc
      INTEGER , DIMENSION(ndims) ::  sizes_glob , subsizes_glob , start_index_glob

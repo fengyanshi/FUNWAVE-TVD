@@ -75,22 +75,14 @@ MODULE BATHY_CORRECTION_MODULE
 CONTAINS
 
 SUBROUTINE CORRECTION
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,SMALL,LARGE,tmp1,tmp2,tmp3, &
-                    MinDepthFrc
-                    
+  USE GLOBAL,ONLY : LARGE,tmp1,MinDepthFrc
+
   USE INPUT_READ
   IMPLICIT NONE
   CHARACTER(LEN=80)::FILE_NAME=' '
-  CHARACTER(LEN=80)::TMP_NAME=' '
-  INTEGER :: Ifile,ierr,K,K5,K10,K15, pointcount
+  INTEGER :: ierr,pointcount
   REAL(SP) :: change_percentage, threshold
 
-# if defined (PARALLEL)
-    INTEGER,DIMENSION(MPI_STATUS_SIZE,4) :: status
-    INTEGER,DIMENSION(4) :: req
-    INTEGER :: nreq,len
-# endif
- 
      pointcount=0
      threshold = 0.05_SP
 

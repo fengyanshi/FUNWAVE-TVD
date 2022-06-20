@@ -110,22 +110,22 @@ SUBROUTINE ALLOCATE_VARIABLES
               Emin(Mloc,Nloc), &
               HrmsSum(Mloc,Nloc), &
               HavgSum(Mloc,Nloc), &
-	        !ykchoi
-	        ETA2sum(Mloc,Nloc), ETA2mean(Mloc,Nloc), &
-			SigWaveHeight(Mloc,Nloc),  &
+              !ykchoi
+              ETA2sum(Mloc,Nloc), ETA2mean(Mloc,Nloc), &
+                  SigWaveHeight(Mloc,Nloc),  &
 # if defined (CARTESIAN)
               U4xL(Mloc1,Nloc),U4xR(Mloc1,Nloc),&
               V4yL(Mloc,Nloc1),V4yR(Mloc,Nloc1), &
-	! ykchoi added V4xL and U4yL (08/06/15)
-			V4xL(Mloc1,Nloc),V4xR(Mloc1,Nloc),&  
-			U4yL(Mloc,Nloc1),U4yR(Mloc,Nloc1) & 
+      ! ykchoi added V4xL and U4yL (08/06/15)
+                  V4xL(Mloc1,Nloc),V4xR(Mloc1,Nloc),&  
+                  U4yL(Mloc,Nloc1),U4yR(Mloc,Nloc1) & 
 # else
 # if defined (ZALPHA)
               U4xL(Mloc1,Nloc),U4xR(Mloc1,Nloc),&
               V4yL(Mloc,Nloc1),V4yR(Mloc,Nloc1), &
         ! ykchoi added V4xL and U4yL (08/06/15)
-	      V4xL(Mloc1,Nloc),V4xR(Mloc1,Nloc),&  
-	      U4yL(Mloc,Nloc1),U4yR(Mloc,Nloc1), &  
+            V4xL(Mloc1,Nloc),V4xR(Mloc1,Nloc),&  
+            U4yL(Mloc,Nloc1),U4yR(Mloc,Nloc1), &  
 # endif
               Dx(Mloc,Nloc),Dy(Mloc,Nloc), Coriolis(Mloc,Nloc), &
               SlopeX(Mloc,Nloc),SlopeY(Mloc,Nloc), &
@@ -181,7 +181,7 @@ SUBROUTINE ALLOCATE_VARIABLES
        ALLOCATE(nu_break(Mloc,Nloc))
        nu_break=nu_bkg
       ENDIF
-	
+
       ALLOCATE(ROLLER_FLUX(Mloc,Nloc),UNDERTOW_U(Mloc,Nloc),UNDERTOW_V(Mloc,Nloc))
 
       IF(WAVEMAKER_VIS)THEN
@@ -251,7 +251,6 @@ SUBROUTINE INITIALIZATION
 # endif
      IMPLICIT NONE
      INTEGER :: VTYPE
-     CHARACTER(LEN=80) :: WHAT
 # if defined (PARALLEL)
      REAL(SP),DIMENSION(:,:),ALLOCATABLE :: VarGlob
      REAL(SP) :: myvar_tmp
@@ -763,7 +762,7 @@ SUBROUTINE INITIALIZATION
 
 
 ! blowup threshold
-	EtaBlowVal=100.0*MAXVAL( abs(Depth(Ibeg:Iend,Jbeg:Jend)) )
+      EtaBlowVal=100.0*MAXVAL( abs(Depth(Ibeg:Iend,Jbeg:Jend)) )
 # if defined (PARALLEL)
       CALL MPI_ALLREDUCE(EtaBlowVal,myvar_tmp,1,MPI_SP,MPI_MAX,MPI_COMM_WORLD,ier)
       EtaBlowVal = myvar_tmp

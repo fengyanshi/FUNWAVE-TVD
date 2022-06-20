@@ -90,7 +90,7 @@ SUBROUTINE OUTPUT
 
       IF(TIME>=PLOT_START_TIME)THEN
 
-	PLOT_COUNT=PLOT_COUNT+DT
+      PLOT_COUNT=PLOT_COUNT+DT
       IF(PLOT_COUNT>=PLOT_INTV)THEN
        PLOT_COUNT=PLOT_COUNT-PLOT_INTV
        CALL PREVIEW
@@ -147,9 +147,7 @@ SUBROUTINE READ_INPUT
     IMPLICIT NONE
     CHARACTER(LEN=80) FILE_NAME
     CHARACTER(LEN=80) MKFOLDER
-    INTEGER::LINE
     INTEGER :: ierr
-    INTEGER :: I_comp
     LOGICAL :: INPUT_PHASE = .FALSE.
 
     !>by Zhouteng Ye
@@ -165,7 +163,7 @@ SUBROUTINE READ_INPUT
 # endif
 
       FDIR=TRIM(RESULT_FOLDER)
-	OPEN(10000,FILE='time_dt.out',STATUS='UNKNOWN')
+      OPEN(10000,FILE='time_dt.out',STATUS='UNKNOWN')
 
       OPEN(3,FILE='LOG.txt')   
 
@@ -789,8 +787,8 @@ SUBROUTINE READ_INPUT
           NO_MASK_FILE = .FALSE.
         ENDIF
 
-	![ykchoi(14.12.24.)
-	  CALL READ_FLOAT(HotStartTime,FILE_NAME,'HotStartTime',ierr)
+      ![ykchoi(14.12.24.)
+        CALL READ_FLOAT(HotStartTime,FILE_NAME,'HotStartTime',ierr)
 
       IF(ierr==1)THEN
         HotStartTime = 0.0_SP
@@ -805,7 +803,7 @@ SUBROUTINE READ_INPUT
 # endif
        ENDIF
 
-	!ykchoi(14.12.24.)]
+      !ykchoi(14.12.24.)]
         CALL READ_INTEGER(icount,FILE_NAME,'OutputStartNumber',ierr)
       IF(ierr==1)THEN
         icount = 1
@@ -2031,7 +2029,7 @@ SUBROUTINE READ_INPUT
          READ(1,*,END=991)(Phase_LEFT(J,I),J=1,NumFreq)
        ENDDO
      CLOSE(1)
-881  INPUT_PHASE = .TRUE.
+     INPUT_PHASE = .TRUE.
 991  CONTINUE
 
     DO J=1,NumFreq
@@ -3060,7 +3058,7 @@ SUBROUTINE READ_INPUT
          WRITE(3,'(A40)')'SHOW_BREAKING Default:  TRUE'
 # endif
        ENDIF
-	
+
       IF(VISCOSITY_BREAKING) SHOW_BREAKING = .TRUE.
 
       IF(SHOW_BREAKING)THEN
@@ -3129,7 +3127,7 @@ SUBROUTINE READ_INPUT
 # endif
       ENDIF
 
-	![ykchoi(08.18.2015) : for viscosity of wavemaker
+      ![ykchoi(08.18.2015) : for viscosity of wavemaker
       CALL READ_LOGICAL(WAVEMAKER_VIS,FILE_NAME,'WAVEMAKER_VIS',ierr)  
       IF(ierr==1)THEN
         WAVEMAKER_VIS = .FALSE.
@@ -3143,20 +3141,20 @@ SUBROUTINE READ_INPUT
          WRITE(3,'(A40)')'WAVEMAKER_VIS Default:  FALSE'
 # endif
        ENDIF
-	
-	IF( VISCOSITY_BREAKING .AND. WAVEMAKER_VIS ) THEN
+
+      IF( VISCOSITY_BREAKING .AND. WAVEMAKER_VIS ) THEN
 # if defined (PARALLEL)
-	  IF (myid.eq.0) then
-	     WRITE(*,*) "==============================================="
-	     WRITE(*,*)  "STOP :: VISCOSITY_BREAKING=T, WAVEMAKER_VIS=T"
-	     WRITE(*,*) "==============================================="
+        IF (myid.eq.0) then
+           WRITE(*,*) "==============================================="
+           WRITE(*,*)  "STOP :: VISCOSITY_BREAKING=T, WAVEMAKER_VIS=T"
+           WRITE(*,*) "==============================================="
           ENDIF
           call MPI_FINALIZE ( ier )
 # else
-	     WRITE(*,*) "==============================================="
-	     WRITE(*,*)  "STOP :: VISCOSITY_BREAKING=T, WAVEMAKER_VIS=T"
-	     WRITE(*,*) "==============================================="
-	  STOP
+           WRITE(*,*) "==============================================="
+           WRITE(*,*)  "STOP :: VISCOSITY_BREAKING=T, WAVEMAKER_VIS=T"
+           WRITE(*,*) "==============================================="
+        STOP
 # endif
       ENDIF
 
@@ -3171,7 +3169,7 @@ SUBROUTINE READ_INPUT
 !  suggest dont use wavemaker_vis 04/30
       IF(WAVEMAKER_VIS)THEN
       CALL READ_FLOAT(visbrk,FILE_NAME,'visbrk',ierr)
-	CALL READ_FLOAT(WAVEMAKER_visbrk,FILE_NAME,'WAVEMAKER_visbrk',ierr)
+      CALL READ_FLOAT(WAVEMAKER_visbrk,FILE_NAME,'WAVEMAKER_visbrk',ierr)
 # if defined (PARALLEL)
       if (myid.eq.0) WRITE(3,'(A14,F12.6)')'visbrk =', visbrk
       if (myid.eq.0) WRITE(3,'(A8,F12.6)')'WAVEMAKER_visbrk =', WAVEMAKER_visbrk
@@ -3179,7 +3177,7 @@ SUBROUTINE READ_INPUT
       WRITE(3,'(A10,F12.6)')'visbrk =', visbrk
       WRITE(3,'(A20,F12.6)')'WAVEMAKER_visbrk =', WAVEMAKER_visbrk
 # endif
-	ENDIF
+      ENDIF
 
 # if defined (PARALLEL)
       if (myid.eq.0) WRITE(3,*)'                                         '
@@ -3203,7 +3201,7 @@ SUBROUTINE READ_INPUT
 # endif
        ENDIF
 
-	CALL READ_FLOAT(STEADY_TIME,FILE_NAME,'STEADY_TIME',ierr)
+      CALL READ_FLOAT(STEADY_TIME,FILE_NAME,'STEADY_TIME',ierr)
       IF(ierr==1)THEN
         STEADY_TIME = LARGE
 # if defined (PARALLEL)
@@ -3240,7 +3238,7 @@ SUBROUTINE READ_INPUT
       WRITE(3,'(A14,F12.6)')'STEADY_TIME =', STEADY_TIME
       WRITE(3,'(A8,F12.6)')'C_smg =', C_smg
 # endif
-	
+
       CALL READ_FLOAT(nu_bkg,FILE_NAME,'nu_bkg',ierr)
       IF(ierr==1)THEN
         nu_bkg = 0.0_SP
@@ -3407,7 +3405,7 @@ SUBROUTINE READ_INPUT
       CALL READ_LOGICAL(OUT_TMP,FILE_NAME,'TMP',ierr) 
 
 !ykchoi
-!	CALL READ_FLOAT(EtaBlowVal,FILE_NAME,'EtaBlowVal',ierr)
+!      CALL READ_FLOAT(EtaBlowVal,FILE_NAME,'EtaBlowVal',ierr)
       IF(ierr==1)THEN
         EtaBlowVal = 10.0_SP
 # if defined (PARALLEL)
@@ -3814,10 +3812,10 @@ SUBROUTINE STATIONS
           read(100,*) dum1,dum2
 # if defined (PARALLEL)
 ![---ykchoi Jan/23/2018
-          !ista(i) = Nghost+dum1-npx*Mglob/px
-          !jsta(i) = Nghost+dum2-npy*Nglob/py
-		ista(i) = Nghost+dum1-( iista - 1 )
-		jsta(i) = Nghost+dum2-( jjsta - 1 )
+          !ista(i) = Nghost+INT(dum1-npx*Mglob/px)
+          !jsta(i) = Nghost+INT(dum2-npy*Nglob/py)
+            ista(i) = Nghost+INT(dum1)-( iista - 1 )
+            jsta(i) = Nghost+INT(dum2)-( jjsta - 1 )
 !---ykchoi Jan/23/2018]
           if ((ista(i).ge.Ibeg).and.(ista(i).le.Iend).and.&
               (jsta(i).ge.Jbeg).and.(jsta(i).le.Jend)) then
@@ -3831,8 +3829,8 @@ SUBROUTINE STATIONS
           endif
 
 # else
-          ista(i) = Nghost+dum1
-          jsta(i) = Nghost+dum2
+          ista(i) = Nghost+INT(dum1)
+          jsta(i) = Nghost+INT(dum2)
           if ((ista(i).ge.Ibeg).and.(ista(i).le.Iend).and.&
               (jsta(i).ge.Jbeg).and.(jsta(i).le.Jend)) then
              nsta(i) = 1
@@ -3948,8 +3946,8 @@ SUBROUTINE STATIONS_SPHERICAL_IJ
 ![---ykchoi Jan/23/2018
           !ista(i) = Nghost+dum1-npx*Mglob/px
           !jsta(i) = Nghost+dum2-npy*Nglob/py
-          ista(i) = Nghost+dum1-( iista - 1 )
-          jsta(i) = Nghost+dum2-( jjsta - 1 )
+          ista(i) = Nghost+INT(dum1)-( iista - 1 )
+          jsta(i) = Nghost+INT(dum2)-( jjsta - 1 )
 !---ykchoi Jan/23/2018]
           if ((ista(i).ge.Ibeg).and.(ista(i).le.Iend).and.&
               (jsta(i).ge.Jbeg).and.(jsta(i).le.Jend)) then
@@ -3963,8 +3961,8 @@ SUBROUTINE STATIONS_SPHERICAL_IJ
           endif
 
 # else
-          ista(i) = Nghost+dum1
-          jsta(i) = Nghost+dum2
+          ista(i) = Nghost+INT(dum1)
+          jsta(i) = Nghost+INT(dum2)
           if ((ista(i).ge.Ibeg).and.(ista(i).le.Iend).and.&
               (jsta(i).ge.Jbeg).and.(jsta(i).le.Jend)) then
              nsta(i) = 1
@@ -4203,7 +4201,6 @@ SUBROUTINE PREVIEW
      IMPLICIT NONE
 
      CHARACTER(LEN=80)::FILE_NAME=' '
-     CHARACTER(LEN=80)::FILE_NAME_MEAN=' '
      CHARACTER(LEN=80)::TMP_NAME=' '
      CHARACTER(LEN=80)::FDIR=' '
 
@@ -4223,21 +4220,21 @@ SUBROUTINE PREVIEW
 102     FORMAT(A20,I6,A14,F12.3,A2,F12.3)
 
         !ykchoi
-	  !itmp1=mod(icount/1000,10)
+        !itmp1=mod(icount/1000,10)
         !itmp2=mod(icount/100,10)
         !itmp3=mod(icount/10,10)
         !itmp4=mod(icount,10)
-	   itmp1=mod(icount/10000,10)
-	   itmp2=mod(icount/1000,10)
-	   itmp3=mod(icount/100,10)
-	   itmp4=mod(icount/10,10)
-	   itmp5=mod(icount,10)
+         itmp1=mod(icount/10000,10)
+         itmp2=mod(icount/1000,10)
+         itmp3=mod(icount/100,10)
+         itmp4=mod(icount/10,10)
+         itmp5=mod(icount,10)
 
         write(file_name(1:1),'(I1)')itmp1
         write(file_name(2:2),'(I1)')itmp2
         write(file_name(3:3),'(I1)')itmp3
         write(file_name(4:4),'(I1)')itmp4
-    	  write(file_name(5:5),'(I1)')itmp5   !ykchoi
+        write(file_name(5:5),'(I1)')itmp5   !ykchoi
 
      IF(ICOUNT==1)THEN
      IF(OUT_DEPTH.OR.BREAKWATER)THEN
@@ -4278,15 +4275,15 @@ SUBROUTINE PREVIEW
         call PutFile(TMP_NAME,VelocityMax)
      ENDIF
      
-     IF(OUT_MFmax)THEN                                                                                            
-        TMP_NAME = TRIM(FDIR)//'MFmax_'//TRIM(FILE_NAME)                                                          
-        call PutFile(TMP_NAME,MomentumFluxMax)                                                                              
-     ENDIF      
+     IF(OUT_MFmax)THEN
+        TMP_NAME = TRIM(FDIR)//'MFmax_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,MomentumFluxMax)
+     ENDIF
      
-     IF(OUT_VORmax)THEN                                                                                            
-        TMP_NAME = TRIM(FDIR)//'VORmax_'//TRIM(FILE_NAME)                                                          
-        call PutFile(TMP_NAME,VorticityMax)                                                                              
-     ENDIF            
+     IF(OUT_VORmax)THEN
+        TMP_NAME = TRIM(FDIR)//'VORmax_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,VorticityMax)
+     ENDIF
      
      IF(OUT_U)THEN
         TMP_NAME = TRIM(FDIR)//'u_'//TRIM(FILE_NAME)
@@ -4309,8 +4306,6 @@ SUBROUTINE PREVIEW
         Int2Flo=MASK9
         call PutFile(TMP_NAME,Int2Flo)
      ENDIF
-
-210   FORMAT(5000I3)
 
      IF(OUT_P)THEN
         TMP_NAME = TRIM(FDIR)//'p_'//TRIM(FILE_NAME)
@@ -4425,8 +4420,6 @@ SUBROUTINE PREVIEW
         call PutFile(TMP_NAME,tmp4preview)
      ENDIF
 
-101   continue
-
 END SUBROUTINE PREVIEW
 
 !-------------------------------------------------------------------------------------
@@ -4459,17 +4452,17 @@ SUBROUTINE PREVIEW_MEAN
 
 102     FORMAT(A20,I6)
 
-	   itmp1=mod(icount_mean/10000,10)
-	   itmp2=mod(icount_mean/1000,10)
-	   itmp3=mod(icount_mean/100,10)
-	   itmp4=mod(icount_mean/10,10)
-	   itmp5=mod(icount_mean,10)
+         itmp1=mod(icount_mean/10000,10)
+         itmp2=mod(icount_mean/1000,10)
+         itmp3=mod(icount_mean/100,10)
+         itmp4=mod(icount_mean/10,10)
+         itmp5=mod(icount_mean,10)
 
         write(file_name(1:1),'(I1)')itmp1
         write(file_name(2:2),'(I1)')itmp2
         write(file_name(3:3),'(I1)')itmp3
         write(file_name(4:4),'(I1)')itmp4
-    	write(file_name(5:5),'(I1)')itmp5  
+        write(file_name(5:5),'(I1)')itmp5  
 
         IF(OUT_Umean)THEN
           TMP_NAME = TRIM(FDIR)//'umean_'//TRIM(FILE_NAME)
@@ -4568,36 +4561,36 @@ SUBROUTINE GetFile(FILE,PHI)
                       0, MPI_COMM_WORLD, ier )
 
      if( myid == 0 )then
-	 PHI = PHIGLOB( 1:Mloc, 1:Nloc )
+       PHI = PHIGLOB( 1:Mloc, 1:Nloc )
      endif
 
      do irank=1, px*py-1
-	  if( myid == 0 ) then
-	    istanum = Nistas(irank+1) - Nghost
-	    iendnum = Niends(irank+1) + Nghost
-	    jstanum = Njstas(irank+1) - Nghost
+        if( myid == 0 ) then
+          istanum = Nistas(irank+1) - Nghost
+          iendnum = Niends(irank+1) + Nghost
+          jstanum = Njstas(irank+1) - Nghost
           jendnum = Njends(irank+1) + Nghost
 
-	    lenx = iendnum - istanum + 1
-	    leny = jendnum - jstanum + 1
-	    lenxy = lenx*leny
-	    allocate( xx(lenx, leny) )
+          lenx = iendnum - istanum + 1
+          leny = jendnum - jstanum + 1
+          lenxy = lenx*leny
+          allocate( xx(lenx, leny) )
 
-	    xx = PHIGLOB( istanum:iendnum, jstanum:jendnum )
-	    call mpi_isend( xx, lenxy, mpi_sp, irank, 1, mpi_comm_world, ireq, ier )
-	    call mpi_wait( ireq, istatus, ier )
+          xx = PHIGLOB( istanum:iendnum, jstanum:jendnum )
+          call mpi_isend( xx, lenxy, mpi_sp, irank, 1, mpi_comm_world, ireq, ier )
+          call mpi_wait( ireq, istatus, ier )
           deallocate( xx )
 
-	  elseif( myid == irank ) then
-	    
-	    lenx = Niend-Nista+1+2*Nghost
-	    leny = Njend-Njsta+1+2*Nghost
-	    lenxy = lenx*leny
+        elseif( myid == irank ) then
+          
+          lenx = Niend-Nista+1+2*Nghost
+          leny = Njend-Njsta+1+2*Nghost
+          lenxy = lenx*leny
 
-	    call mpi_irecv( PHI, lenxy, mpi_sp, 0, 1, mpi_comm_world, ireq, ier )
-	    call mpi_wait( ireq, istatus, ier )
+          call mpi_irecv( PHI, lenxy, mpi_sp, 0, 1, mpi_comm_world, ireq, ier )
+          call mpi_wait( ireq, istatus, ier )
 
-	  endif
+        endif
      enddo
 
      deallocate( Nistas, Niends, Njstas, Njends )
@@ -4625,8 +4618,6 @@ SUBROUTINE PutFile(FILE_NAME,PHI)
 
      CHARACTER(LEN=80) FILE_NAME
      REAL(SP),DIMENSION(Mloc,Nloc),INTENT(IN) :: PHI
-
-     CHARACTER(LEN=80)::TMP_NAME=' '
 
      SELECT CASE (TRIM(FIELD_IO_TYPE))
       CASE ('ASCII' , 'ascii')

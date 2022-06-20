@@ -54,11 +54,13 @@
 SUBROUTINE INDEX
     USE GLOBAL
     IMPLICIT NONE
-    INTEGER :: icp
 
 ![--------------ykchoi 02/May/2017
+# if defined (PARALLEL)
+    INTEGER :: icp
     INTEGER :: myidi, myidj, irank
     INTEGER, ALLOCATABLE :: iistas(:), iiends(:), jjstas(:), jjends(:)
+# endif
 !--------------ykchoi 02/May/2017]
 
 ! TEMP
@@ -82,9 +84,9 @@ SUBROUTINE INDEX
 ![--------------ykchoi 04/May/2017
    if( nprocs /= NumberProcessor) then
      if( myid==0 ) then
-	 print *, '======================================================='
+       print *, '======================================================='
        print *, '*** STOP :: Number of processors(',nprocs,') in MPIRUN /= Px*Py(',PX*PY,') ***'
-	 print *, '======================================================='
+       print *, '======================================================='
      endif
      call MPI_FINALIZE ( ier )
    endif   
@@ -104,11 +106,11 @@ SUBROUTINE INDEX
     DO I=1,PX
     DO J=1,PY
       ProcessorID(I,J) = icp
-	![----ykchoi(04/May/2017) 
-	if( myid == icp ) then      
-	  myidi = I-1; myidj = J-1
-	endif
-	!----ykchoi]
+      ![----ykchoi(04/May/2017) 
+      if( myid == icp ) then      
+        myidi = I-1; myidj = J-1
+      endif
+      !----ykchoi]
       icp=icp+1
     ENDDO
     ENDDO
@@ -148,12 +150,12 @@ SUBROUTINE INDEX
 
     if( myid == 0 ) then
       open(500, file='Grid_Range.out', status='unknown')
-	write(500,'(A)')'Core#  istart#  iend#  jstart#  jend#'
-	do irank=0,nprocs-1
-	   write(500,'(5(i6,1x))') irank, iistas(irank+1), iiends(irank+1), &
-	                                  jjstas(irank+1), jjends(irank+1)
-	enddo
-	close(500)
+      write(500,'(A)')'Core#  istart#  iend#  jstart#  jend#'
+      do irank=0,nprocs-1
+         write(500,'(5(i6,1x))') irank, iistas(irank+1), iiends(irank+1), &
+                                        jjstas(irank+1), jjends(irank+1)
+      enddo
+      close(500)
     endif
     deallocate( iistas, iiends, jjstas, jjends ) 
     !=============================
@@ -217,7 +219,7 @@ SUBROUTINE ESTIMATE_DT(M,N,DX,DY,U,V,H,MinDepthFrc,DT,CFL,TIME)
      USE PARAM
      USE GLOBAL, ONLY : DT_fixed, FIXED_DT
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : ier,myid
+     USE GLOBAL, ONLY : ier
 # endif
      IMPLICIT NONE
      INTEGER,INTENT(IN)::M,N
@@ -310,7 +312,10 @@ SUBROUTINE MAX_MIN_PROPERTY
     USE METEO_MODULE
 # endif
     IMPLICIT NONE
-    REAL(SP) :: maxv, MaxAbsEta,omega_0
+    REAL(SP) :: maxv
+# if !defined (CARTESIAN)
+    REAL(SP) :: omega_0
+# endif
 
       DO J=1,Nloc
       DO I=1,Mloc
@@ -400,24 +405,24 @@ SUBROUTINE CHECK_BLOWUP
      REAL(SP)::myvar_tmp
 # endif
 
-	MaxAbsEta=MAXVAL( abs(Eta(Ibeg:Iend,Jbeg:Jend)) )
+      MaxAbsEta=MAXVAL( abs(Eta(Ibeg:Iend,Jbeg:Jend)) )
 # if defined (PARALLEL)
       CALL MPI_ALLREDUCE(MaxAbsEta,myvar_tmp,1,MPI_SP,MPI_MAX,MPI_COMM_WORLD,ier)
       MaxAbsEta = myvar_tmp
 # endif
 
-	if (MaxAbsEta > EtaBlowVal) then
+      if (MaxAbsEta > EtaBlowVal) then
 # if defined (PARALLEL)
-	   if (myid.eq.0) then
+         if (myid.eq.0) then
 # endif
-	      WRITE(*,*) "========================================="
-		  WRITE(*,*) "BlowUp Time, MaxAbsEta=", Time, MaxAbsEta
-	      WRITE(*,*) "========================================="
+            WRITE(*,*) "========================================="
+              WRITE(*,*) "BlowUp Time, MaxAbsEta=", Time, MaxAbsEta
+            WRITE(*,*) "========================================="
 # if defined (PARALLEL)
-	   endif
+         endif
 # endif
-	   ICOUNT=99998;
-	   CALL PREVIEW
+         ICOUNT=99998;
+         CALL PREVIEW
 
 # if defined (PARALLEL)
      ! 2019/09/04 mayhl: Switched MPI_FINALIZE to MPI_ABORT 
@@ -427,7 +432,7 @@ SUBROUTINE CHECK_BLOWUP
      STOP
 # endif
 
-	endif
+      endif
 
 
 END SUBROUTINE CHECK_BLOWUP

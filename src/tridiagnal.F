@@ -60,8 +60,8 @@
     USE PARAM
 
 # if defined (PARALLEL)
-    USE GLOBAL, ONLY : n_suth, n_nrth, comm2d, ier,myid,PX,PY,&
-                       NumberProcessor,ProcessorID
+    USE GLOBAL, ONLY : ier,myid,PX,PY,&
+                       ProcessorID
     USE MPI
 # endif
     USE GLOBAL, ONLY : Mloc, Nloc, Ibeg, Iend, Jbeg, Jend
@@ -69,18 +69,16 @@
 
 # if defined (PARALLEL)
     INTEGER,DIMENSION(1) :: req
-    INTEGER :: nreq,len,ll,l,II,JJ
+    INTEGER :: len,l,II
 !    INTEGER,DIMENSION(NumberProcessor) :: npxs,npys
     integer,dimension(MPI_STATUS_SIZE,1) :: status
     REAL(SP),DIMENSION(Mloc) :: xx
-    REAL(sp) :: myvar,mybeta
+    REAL(SP), dimension(Mloc) :: y2_end,y1_end
 # endif
 
     REAL(SP), dimension(Mloc,Nloc) :: a, c, d, f
     REAL(SP), dimension(Mloc,Nloc) :: c1, y1, y2
-    REAL(SP), dimension(Mloc) :: beta, a_beg,c_end,y2_end,y1_end
-    REAL(SP), dimension(Nloc) :: Axx,Cxx,Dxx,U1D
-    REAL(SP), dimension(Mloc,2) :: rmsg, smsg
+    REAL(SP), dimension(Mloc) :: beta, a_beg,c_end
 
 !
 !  off diagonal corner values are stored in a(i,Jbeg) and c(i, Jend)
@@ -152,24 +150,24 @@
    DO II=1,PX
     if(myid == ProcessorID(II,1)) then
       do i= Ibeg, Iend
-		c(i,Jbeg)=c(i,Jbeg)/(1+c_end(I))
-		d(i,Jbeg)=d(i,Jbeg)/(1+c_end(I))
+            c(i,Jbeg)=c(i,Jbeg)/(1+c_end(I))
+            d(i,Jbeg)=d(i,Jbeg)/(1+c_end(I))
       enddo
     endif
     if(myid == ProcessorID(II,PY)) then
       do i= Ibeg, Iend
-		a(i,Jend)=a(i,Jend)/(1+a_beg(I))
-		d(i,Jend)=d(i,Jend)/(1+a_beg(I))
+            a(i,Jend)=a(i,Jend)/(1+a_beg(I))
+            d(i,Jend)=d(i,Jend)/(1+a_beg(I))
       enddo
     endif
    ENDDO  ! end PX
 
 # else
     do i= Ibeg, Iend
-		c(i,Jbeg)=c(i,Jbeg)/(1+c_end(I))
-		d(i,Jbeg)=d(i,Jbeg)/(1+c_end(I))
-		a(i,Jend)=a(i,Jend)/(1+a_beg(I))
-		d(i,Jend)=d(i,Jend)/(1+a_beg(I))
+            c(i,Jbeg)=c(i,Jbeg)/(1+c_end(I))
+            d(i,Jbeg)=d(i,Jbeg)/(1+c_end(I))
+            a(i,Jend)=a(i,Jend)/(1+a_beg(I))
+            d(i,Jend)=d(i,Jend)/(1+a_beg(I))
     enddo
 # endif
 
@@ -177,14 +175,14 @@
 !  Diagonal matrix now stored in a,c.  c and d will get trashed in first call to TRIDy.
 !  We need c again but not d
 !
-	c1=c
+      c1=c
 !
 !  Solution pass one:  Solve B y1 = d
 !
 # if defined(PARALLEL)
         CALL TRIDy ( a, c1, d, y1)
 # else
-	call TRIDy_ser( a, c1, d, y1)
+      call TRIDy_ser( a, c1, d, y1)
 # endif
 !
 !  Now, the RHS for the second problem, which is ones in the first and last positions (also renormalized)
@@ -207,33 +205,33 @@
 
         if(myid==ProcessorID(II,PY))then
           do i=Ibeg, Iend
-		  d(i,Jend)=-1.0_SP/(1.0_SP+a_beg(I))
+              d(i,Jend)=-1.0_SP/(1.0_SP+a_beg(I))
           enddo
-	endif
+      endif
     ENDDO ! end PX
 # else 
-	do i=Ibeg, Iend
-		d(i,Jbeg)=1.0_SP/(1.0_SP+c_end(I))
-		do j = Jbeg+1, Jend-1
-			d(i,j)=ZERO
-		enddo
-		d(i,Jend)=-1.0_SP/(1.0_SP+a_beg(I))
-	enddo
+      do i=Ibeg, Iend
+            d(i,Jbeg)=1.0_SP/(1.0_SP+c_end(I))
+            do j = Jbeg+1, Jend-1
+                  d(i,j)=ZERO
+            enddo
+            d(i,Jend)=-1.0_SP/(1.0_SP+a_beg(I))
+      enddo
 # endif
 
 !
-!  Solution	pass two:  Solve By2=w
+!  Solution pass two:  Solve By2=w
 !
 
 # if defined (PARALLEL)
         CALL TRIDy ( a, c, d, y2)
 # else
-	call TRIDy_ser( a, c, d, y2)
+      call TRIDy_ser( a, c, d, y2)
 # endif
 !
 !  Compute scale factor
 !
-	
+
 # if defined (PARALLEL)
 
      IF(PY>1)THEN
@@ -276,8 +274,8 @@
 ! calculate beta
         if(myid==ProcessorID(II,1))then
          DO I=Ibeg,Iend
-		beta(i) = ( c_end(I)*y1(i,Jbeg) - a_beg(I)*y1_end(I)) / &
-			( 1.0_SP - ( c_end(I)*y2(i,Jbeg) - a_beg(I)*y2_end(I) ) )
+            beta(i) = ( c_end(I)*y1(i,Jbeg) - a_beg(I)*y1_end(I)) / &
+                  ( 1.0_SP - ( c_end(I)*y2(i,Jbeg) - a_beg(I)*y2_end(I) ) )
 
          ENDDO
         endif ! end myid
@@ -301,24 +299,24 @@
      
      ELSE  ! PY=1
 
-	do i=Ibeg, Iend
-		beta(i) = ( c_end(I)*y1(i,Jbeg) - a_beg(I)*y1(i,Jend)) / &
-			( 1.0_SP - ( c_end(I)*y2(i,Jbeg) - a_beg(I)*y2(i,Jend) ) )
+      do i=Ibeg, Iend
+            beta(i) = ( c_end(I)*y1(i,Jbeg) - a_beg(I)*y1(i,Jend)) / &
+                  ( 1.0_SP - ( c_end(I)*y2(i,Jbeg) - a_beg(I)*y2(i,Jend) ) )
         enddo
 
      ENDIF ! if PY>1 
                  
 # else
-	do i=Ibeg, Iend
-		beta(i) = ( c_end(I)*y1(i,Jbeg) - a_beg(I)*y1(i,Jend)) / &
-			( 1.0_SP - ( c_end(I)*y2(i,Jbeg) - a_beg(I)*y2(i,Jend) ) )
+      do i=Ibeg, Iend
+            beta(i) = ( c_end(I)*y1(i,Jbeg) - a_beg(I)*y1(i,Jend)) / &
+                  ( 1.0_SP - ( c_end(I)*y2(i,Jbeg) - a_beg(I)*y2(i,Jend) ) )
         enddo
 # endif
-	do i=Ibeg, Iend        
-		do j = Jbeg, Jend
-			f(i,j)=y1(i,j)+beta(i)*y2(i,j)
-		enddo
-	enddo
+      do i=Ibeg, Iend        
+            do j = Jbeg, Jend
+                  f(i,j)=y1(i,j)+beta(i)*y2(i,j)
+            enddo
+      enddo
 
       RETURN
 
@@ -501,7 +499,7 @@ END SUBROUTINE TRIDx
 !-----------------------------------------------------------------------------------
 SUBROUTINE TRIDy ( a, c, d, f)
         USE PARAM
-        USE GLOBAL, ONLY : n_suth, n_nrth, comm2d, ier, Mloc, Nloc,myid, &
+        USE GLOBAL, ONLY : n_suth, n_nrth, comm2d, ier, Mloc, Nloc, &
                            Ibeg,Iend,Jbeg,Jend
         IMPLICIT NONE 
 

@@ -65,10 +65,10 @@ SUBROUTINE UPDATE_MASK
 
 ! for the serial code, MASK at ghost cells keep no change
 
-#if defined(PARALLEL)
+# if defined(PARALLEL)
      call phi_int_exch(MASK)
      call phi_int_exch(MASK9)
-#endif
+# endif
 
      MASKtmp=MASK
 !     ETAtmp=ETA

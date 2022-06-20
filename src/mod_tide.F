@@ -83,17 +83,12 @@ MODULE TIDE_MODULE
 CONTAINS
   
 SUBROUTINE TIDE_INITIAL
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL,INPUT_FILE_NAME
-# if defined (PARALLEL)
-  USE GLOBAL,ONLY : iista,jjsta   
-# endif
-                    
+  USE GLOBAL,ONLY : INPUT_FILE_NAME
   USE INPUT_READ
   IMPLICIT NONE
 
   CHARACTER(LEN=80)::FILE_NAME=' '
-  CHARACTER(LEN=80)::TMP_NAME=' '
-  INTEGER :: Ifile,ierr
+  INTEGER :: ierr
 
 
 ! read  from input.txt
@@ -418,13 +413,8 @@ SUBROUTINE TIDE_INITIAL
 END SUBROUTINE TIDE_INITIAL
 
 SUBROUTINE TIDE_SPONGE
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL
-# if defined (PARALLEL)
-  USE GLOBAL,ONLY : iista,jjsta   
-# endif
-                    
   IMPLICIT NONE
-  REAL(SP) :: ri,lim,Lstart,Lend,R_sp,A_sp
+  REAL(SP) :: ri,lim,R_sp,A_sp
   
   Iwidth = 30
   lim = 1.0_SP
@@ -491,11 +481,6 @@ SUBROUTINE TIDE_SPONGE
 END SUBROUTINE TIDE_SPONGE
 
 SUBROUTINE TIDE_BC
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL
-# if defined (PARALLEL)
-  USE GLOBAL,ONLY : iista,jjsta   
-# endif
-                    
   IMPLICIT NONE
 
    IF(TideWest)THEN

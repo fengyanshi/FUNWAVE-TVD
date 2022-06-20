@@ -54,7 +54,7 @@
 
 MODULE VESSEL_MODULE
   USE PARAM
-  USE GLOBAL,ONLY : Mloc,Nloc,Nghost,Ibeg,Iend,Jbeg,Jend,DX,DY, &
+  USE GLOBAL,ONLY : Mloc,Nloc,Nghost,Ibeg,Iend,Jbeg,Jend,DX, &
                     H,ETA,ETA0,Xco,Yco
 
   USE INPUT_READ
@@ -112,10 +112,6 @@ CONTAINS
 
 SUBROUTINE VESSEL_INITIAL
   USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL, INPUT_FILE_NAME
-# if defined (PARALLEL)
-  USE GLOBAL,ONLY : iista,jjsta   !ykchoi Jan/23/2018
-# endif
-                    
   USE INPUT_READ
   IMPLICIT NONE
   CHARACTER(LEN=80)::FILE_NAME=' '
@@ -400,10 +396,13 @@ SUBROUTINE VESSEL_INITIAL
 End SUBROUTINE VESSEL_INITIAL
 
 SUBROUTINE VESSEL_FORCING
-  USE GLOBAL,ONLY : Mloc,Nloc,tmp1,tmp2,SMALL,TIME,ZERO,DT,DEPTH
+  USE GLOBAL,ONLY : Mloc,Nloc,tmp1,tmp2,SMALL,TIME,ZERO,DX,DY,DT
+# if defined (DEEP_DRAFT_VESSEL)
+  USE GLOBAL,ONLY : DEPTH
+# endif
   USE INPUT_READ
   IMPLICIT NONE
-  INTEGER :: Ifile,ierr,I,J
+  INTEGER :: Ifile,I,J
 
 
   VesselFluxGradient = ZERO
@@ -560,10 +559,10 @@ SUBROUTINE VESSEL_FORCING
 END SUBROUTINE VESSEL_FORCING
 
 SUBROUTINE PRESSURE_SOURCE (Xves,Yves)
-  USE GLOBAL,ONLY : Mloc,Nloc,tmp1,tmp2,SMALL,TIME,ZERO, H,U,V,  &
-                    DX,DY,Ibeg,Iend,Jbeg,Jend,DEPTH
+  USE GLOBAL,ONLY : Mloc,Nloc,SMALL,ZERO, &
+                    DX,DY,Ibeg,Iend,Jbeg,Jend
   IMPLICIT NONE
-  INTEGER :: ierr,I,J
+  INTEGER :: I,J
   REAL(SP) :: Xves,Yves,Lves,Wves
 #if defined (PARALLEL)
     REAL(SP) :: myvar
@@ -690,10 +689,12 @@ SUBROUTINE PRESSURE_SOURCE (Xves,Yves)
 END SUBROUTINE PRESSURE_SOURCE
 
 SUBROUTINE GREEN_FUNCTION_SOURCE (Xves,Yves)
-  USE GLOBAL,ONLY : Mloc,Nloc,tmp1,tmp2,SMALL,TIME,ZERO, H,U,V,  &
-                    DX,DY,Ibeg,Iend,Jbeg,Jend,DEPTH
+  USE GLOBAL,ONLY : Mloc,Nloc,ZERO
+# if defined (REALISTIC_VESSEL_BODY)
+  USE GLOBAL,ONLY : H,U,V, DX,DY,Ibeg,Iend,Jbeg,Jend,SMALL,DEPTH
+# endif
   IMPLICIT NONE
-  INTEGER :: ierr,I,J
+  INTEGER :: I,J
   REAL(SP) :: Xves,Yves,Lves,Wves
 
 
@@ -780,10 +781,9 @@ END SUBROUTINE GREEN_FUNCTION_SOURCE
 
 
 SUBROUTINE SLENDER_BODY_SOURCE (Xves,Yves)
-  USE GLOBAL,ONLY : Mloc,Nloc,tmp1,tmp2,SMALL,TIME,ZERO, H,U,V,  &
-                    DX,DY,Ibeg,Iend,Jbeg,Jend,DEPTH
+  USE GLOBAL,ONLY : Mloc,Nloc,SMALL,ZERO
   IMPLICIT NONE
-  INTEGER :: ierr,I,J
+  INTEGER :: I,J
   REAL(SP) :: Xves,Yves,Lves,Wves
   REAL(SP) :: x_right_1, x_right_2, x_left_1, x_left_2
 

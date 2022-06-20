@@ -53,6 +53,8 @@
 !      05/28/2010 Fengyan Shi
 !
 !-------------------------------------------------------------------------------------
+#define nop(x) associate( x => x ); end associate
+
 SUBROUTINE SOLITARY_WAVE_LEFT_BOUNDARY
      USE GLOBAL
      IMPLICIT NONE
@@ -96,7 +98,7 @@ SUBROUTINE INITIAL_WAVE
      USE GLOBAL
      IMPLICIT NONE
      REAL(SP),Dimension(Mloc,Nloc)::XX,YY
-     REAL(SP):: sigma,x_c,y_c,a,r
+     REAL(SP):: sigma,x_c,y_c,a
      INTEGER :: ii1,ii2
 
 ! the initial wave domain includes ghost cells
@@ -115,7 +117,7 @@ SUBROUTINE INITIAL_WAVE
 
      sigma=0.5
      x_c=10.0
-     y_c=10.0	
+     y_c=10.0
      a=0.1
 
      do j=1,Nloc
@@ -177,8 +179,7 @@ SUBROUTINE INITIAL_RECTANGULAR(M,N,Nghost,Dphi,Dtheta,Lon_West,Lat_South, &
 # endif
      USE PARAM
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : npx,npy,px,py,Mglob,Nglob,myid, &
-					  iista, jjsta   !ykchoi Jan/23/2018
+     USE GLOBAL, ONLY : iista, jjsta   !ykchoi Jan/23/2018
 # endif
      IMPLICIT NONE
      INTEGER,INTENT(IN) :: M,N,Nghost
@@ -199,10 +200,10 @@ SUBROUTINE INITIAL_RECTANGULAR(M,N,Nghost,Dphi,Dtheta,Lon_West,Lat_South, &
 !     Ir=Nghost+Xc/DX+WID/DX +1 - npx*Mglob/px
 !     Jl=Nghost+Yc/DY-WID/DY +1 - npy*Nglob/py
 !     Jr=Nghost+Yc/DY+WID/DY +1 - npy*Nglob/py
-     Il=Nghost+Xc/DX-WID/DX +1 - (iista - 1)
-     Ir=Nghost+Xc/DX+WID/DX +1 - (iista - 1)
-     Jl=Nghost+Yc/DY-WID/DY +1 - (jjsta - 1)
-     Jr=Nghost+Yc/DY+WID/DY +1 - (jjsta - 1)
+     Il=INT(Nghost+Xc/DX-WID/DX) +1 - (iista - 1)
+     Ir=INT(Nghost+Xc/DX+WID/DX) +1 - (iista - 1)
+     Jl=INT(Nghost+Yc/DY-WID/DY) +1 - (jjsta - 1)
+     Jr=INT(Nghost+Yc/DY+WID/DY) +1 - (jjsta - 1)
 !---ykchoi Jan/23/2018]
 # else
 ![---ykchoi Jan/23/2018
@@ -210,10 +211,10 @@ SUBROUTINE INITIAL_RECTANGULAR(M,N,Nghost,Dphi,Dtheta,Lon_West,Lat_South, &
 !     Ir=Nghost+(Xc-Lon_West)/dphi+WID/dphi +1 - npx*Mglob/px
 !     Jl=Nghost+(Yc-Lat_South)/dtheta-WID/dtheta +1 - npy*Nglob/py
 !     Jr=Nghost+(Yc-Lat_South)/dtheta+WID/dtheta +1 - npy*Nglob/py
-     Il=Nghost+(Xc-Lon_West)/dphi-WID/dphi +1 - (iista - 1)
-     Ir=Nghost+(Xc-Lon_West)/dphi+WID/dphi +1 - (iista - 1)
-     Jl=Nghost+(Yc-Lat_South)/dtheta-WID/dtheta +1 - (jjsta - 1)
-     Jr=Nghost+(Yc-Lat_South)/dtheta+WID/dtheta +1 - (jjsta - 1)
+     Il=INT(Nghost+(Xc-Lon_West)/dphi-WID/dphi) +1 - (iista - 1)
+     Ir=INT(Nghost+(Xc-Lon_West)/dphi+WID/dphi) +1 - (iista - 1)
+     Jl=INT(Nghost+(Yc-Lat_South)/dtheta-WID/dtheta) +1 - (jjsta - 1)
+     Jr=INT(Nghost+(Yc-Lat_South)/dtheta+WID/dtheta) +1 - (jjsta - 1)
 !---ykchoi Jan/23/2018]
 # endif
 
@@ -228,15 +229,15 @@ SUBROUTINE INITIAL_RECTANGULAR(M,N,Nghost,Dphi,Dtheta,Lon_West,Lat_South, &
 # else
 
 # if defined (CARTESIAN)
-     Il=Xc/DX+1 - WID/DX + Nghost
-     Ir=Xc/DX+1 + WID/DX + Nghost
-     Jl=Yc/DY+1 - WID/DY + Nghost
-     Jr=Yc/DY+1 + WID/DY + Nghost
+     Il=INT(Xc/DX+1 - WID/DX) + Nghost
+     Ir=INT(Xc/DX+1 + WID/DX) + Nghost
+     Jl=INT(Yc/DY+1 - WID/DY) + Nghost
+     Jr=INT(Yc/DY+1 + WID/DY) + Nghost
 # else
-     Il=Nghost+(Xc-Lon_West)/dphi-WID/dphi +1
-     Ir=Nghost+(Xc-Lon_West)/dphi+WID/dphi +1
-     Jl=Nghost+(Yc-Lat_South)/dtheta-WID/dtheta +1
-     Jr=Nghost+(Yc-Lat_South)/dtheta+WID/dtheta +1
+     Il=INT(Nghost+(Xc-Lon_West)/dphi-WID/dphi) +1
+     Ir=INT(Nghost+(Xc-Lon_West)/dphi+WID/dphi) +1
+     Jl=INT(Nghost+(Yc-Lat_South)/dtheta-WID/dtheta) +1
+     Jr=INT(Nghost+(Yc-Lat_South)/dtheta+WID/dtheta) +1
 # endif
 
      Eta(Il:Ir,Jl:Jr) = AMP
@@ -262,8 +263,7 @@ SUBROUTINE INITIAL_GAUSIAN(M,N,Nghost,Dphi,Dtheta,Lon_West,Lat_South, &
 # endif
      USE PARAM
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : npx,npy,px,py,Mglob,Nglob,myid, &
-					  iista, jjsta   !ykchoi Jan/23/2018
+     USE GLOBAL, ONLY : iista, jjsta   !ykchoi Jan/23/2018
 # endif
      IMPLICIT NONE
      INTEGER,INTENT(IN) :: M,N,Nghost
@@ -273,7 +273,6 @@ SUBROUTINE INITIAL_GAUSIAN(M,N,Nghost,Dphi,Dtheta,Lon_West,Lat_South, &
      REAL(SP),INTENT(IN) :: Xc,Yc,WID,AMP,Lon_West,Lat_South,Dphi,Dtheta
 # endif
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Eta
-     INTEGER :: Il,Jl,Ir,Jr
      REAL(SP) :: r,xr,yr
      
      Eta = ZERO
@@ -302,7 +301,7 @@ SUBROUTINE INITIAL_GAUSIAN(M,N,Nghost,Dphi,Dtheta,Lon_West,Lat_South, &
       yr=(J-1)*dtheta-Nghost*dtheta + (jjsta - 1)*dtheta+Lat_South
 !---ykchoi Jan/23/2018]
       r=SQRT((xr-Xc)**2+(yr-Yc)**2)
-       Eta(I,J) = AMP*EXP(-r**2/1.0_SP/WID**2)
+      Eta(I,J) = AMP*EXP(-r**2/1.0_SP/WID**2)
      ENDDO
      ENDDO
 # endif
@@ -351,8 +350,7 @@ SUBROUTINE INITIAL_DIPOLE(M,N,Nghost,Dphi,Dtheta,Lon_West,Lat_South, &
 # endif
      USE PARAM
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : npx,npy,px,py,Mglob,Nglob,myid, &
-                        iista, jjsta   !ykchoi Jan/23/2018
+     USE GLOBAL, ONLY : iista, jjsta   !ykchoi Jan/23/2018
 # endif
      IMPLICIT NONE
      INTEGER,INTENT(IN) :: M,N,Nghost
@@ -362,7 +360,6 @@ SUBROUTINE INITIAL_DIPOLE(M,N,Nghost,Dphi,Dtheta,Lon_West,Lat_South, &
      REAL(SP),INTENT(IN) :: Xc,Yc,WID,AMP,Lon_West,Lat_South,Dphi,Dtheta
 # endif
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Eta
-     INTEGER :: Il,Jl,Ir,Jr
      REAL(SP) :: r,xr,yr,uni
      
      Eta = ZERO
@@ -438,8 +435,7 @@ END SUBROUTINE INITIAL_DIPOLE
 !-------------------------------------------------------------------------------------
 SUBROUTINE INITIAL_N_WAVE(M,N,DX,x1,x2,Ha,gamma_s,dep,U,V,Eta)
 # if defined (PARALLEL)
-     USE GLOBAL, only: npx,px,Mglob, &
-	                 iista   !ykchoi Jan/23/2018
+     USE GLOBAL, only: iista   !ykchoi Jan/23/2018
 # endif
      USE PARAM
      IMPLICIT NONE
@@ -452,8 +448,10 @@ SUBROUTINE INITIAL_N_WAVE(M,N,DX,x1,x2,Ha,gamma_s,dep,U,V,Eta)
      REAL(SP),DIMENSION(M,N),INTENT(IN) :: DX
 # endif
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: U,V,Eta
+     nop(gamma_s)
+     nop(x2)
      IF(dep==ZERO)THEN
-      !WRITE(*,*)'depth for Nwave should not be 0, stop!'
+      WRITE(*,*)'depth for Nwave should not be 0, stop!'
       STOP
      ENDIF
 ! recalculate a0 and gamma based on Synolakis etal (A15)
@@ -470,7 +468,7 @@ SUBROUTINE INITIAL_N_WAVE(M,N,DX,x1,x2,Ha,gamma_s,dep,U,V,Eta)
 ! start from ghost cell
 ![---ykchoi Jan/23/2018       
 !     tmp1=(npx*Mglob/px+I-1)*DX
-	tmp1=( (iista - 1) +I-1)*DX
+      tmp1=( (iista - 1) +I-1)*DX
 !---ykchoi Jan/23/2018]
 # else
        tmp1=(I-1)*DX
@@ -512,8 +510,7 @@ SUBROUTINE INITIAL_SOLITARY_WAVE(M,N,DX,Xwavemaker,&
            AMP_Soli,Dep_Soli,Beta,U,V,Eta,SolitaryPositiveDirection)
      USE PARAM
 # if defined (PARALLEL)
-     USE GLOBAL, only: npx,px,Mglob, &
-	                 iista    !ykchoi Jan/23/2018
+     USE GLOBAL, only: iista    !ykchoi Jan/23/2018
 # endif
      IMPLICIT NONE
      INTEGER,INTENT(IN) :: M,N
@@ -527,6 +524,7 @@ SUBROUTINE INITIAL_SOLITARY_WAVE(M,N,DX,Xwavemaker,&
      REAL(SP),INTENT(IN) :: AMP_Soli
      REAL(SP) :: A,B,A1,A2,alpha,SC,Cph,C_ph
      LOGICAL,INTENT(IN) :: SolitaryPositiveDirection
+     nop(Beta)
 
 !     alpha=0.5_SP*Beta*Beta+Beta
    ! something wrong here. if beta=-0.531, then alpha should be -0.39

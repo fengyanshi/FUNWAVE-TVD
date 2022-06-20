@@ -49,6 +49,8 @@
 !        05/06/2010 Fengyan Shi
 !
 !-------------------------------------------------------------------------------------
+#define nop(x) associate( x => x ); end associate
+
 SUBROUTINE FLUXES
      USE GLOBAL
      IMPLICIT NONE
@@ -79,7 +81,7 @@ SUBROUTINE FLUXES
   ! I removed option for spherical
 
       ELSEIF(HIGH_ORDER(1:3)=='WEN') THEN    !ykchoi
-	 CALL CONSTRUCTION_WENO
+       CALL CONSTRUCTION_WENO
        CALL WAVE_SPEED(Mloc,Nloc,Mloc1,Nloc1,UxL,UxR,VyL,VyR,HxL,HxR,HyL,HyR, &
             SxL,SxR,SyL,SyR)
 # endif
@@ -89,8 +91,8 @@ SUBROUTINE FLUXES
       ELSEIF(HIGH_ORDER(1:3)=='MLP') THEN    !ykchoi
 
        CALL CONSTRUCTION_HO_MLP  
-	 ! CONSTRUCTION_HO_MLP is the same with CONSTRUCTION_HO. 
-	 ! But, CONSTRUCT_HO_X_MLP and CONSTRUCT_HO_Y_MLP are used.
+       ! CONSTRUCTION_HO_MLP is the same with CONSTRUCTION_HO. 
+       ! But, CONSTRUCT_HO_X_MLP and CONSTRUCT_HO_Y_MLP are used.
 
        CALL WAVE_SPEED(Mloc,Nloc,Mloc1,Nloc1,UxL,UxR,VyL,VyR,HxL,HxR,HyL,HyR, &
             SxL,SxR,SyL,SyR)
@@ -98,7 +100,7 @@ SUBROUTINE FLUXES
 !-------------------------------------------------------------
 !-------------------------------------------------------------
 
-      ELSE                                     
+      ELSE
        CALL DelxyFun
        CALL CONSTRUCTION 
        CALL WAVE_SPEED(Mloc,Nloc,Mloc1,Nloc1,UxL,UxR,VyL,VyR,HxL,HxR,HyL,HyR, &
@@ -149,7 +151,6 @@ END SUBROUTINE FLUX_AT_INTERFACE
 !-------------------------------------------------------------------------------------
 SUBROUTINE FLUX_AT_INTERFACE_HLL
      USE GLOBAL
-     REAL(SP)::SR,SL,FL,FR,UL,UR
 
      CALL HLL(Mloc1,Nloc,SxL,SxR,PL,PR,EtaRxL,EtaRxR,P)
      CALL HLL(Mloc,Nloc1,SyL,SyR,QL,QR,EtaRyL,EtaRyR,Q)
@@ -458,10 +459,10 @@ SUBROUTINE CONSTRUCTION
      REAL(SP),DIMENSION(Mloc,Nloc) :: DelyV4, DelyU4
 # endif
 
-![ykchoi	(09.07.2015)
+![ykchoi (09.07.2015)
      REAL(SP),ALLOCATABLE :: MASK9u(:,:), MASK9v(:,:)
      ALLOCATE( MASK9u(1:Mloc1,1:Nloc), MASK9v(1:Mloc,1:Nloc1) )
-	
+
      MASK9u(1:Mloc,1:Nloc)=MASK9(1:Mloc,1:Nloc)
      MASK9v(1:Mloc,1:Nloc)=MASK9(1:Mloc,1:Nloc)
      
@@ -490,7 +491,7 @@ SUBROUTINE CONSTRUCTION
 ! ykchoi (15. 08. 06.)
 ! DelxV4 should be considered.
       CALL DelxFun(DX,Mloc,Nloc,V4,DelxV4)
-	CALL CONSTRUCT_X(Mloc,Mloc1,Nloc,DX,V4,DelxV4,V4xL,V4xR,Kappa)
+      CALL CONSTRUCT_X(Mloc,Mloc1,Nloc,DX,V4,DelxV4,V4xL,V4xR,Kappa)
      ENDIF
 # endif
 
@@ -561,15 +562,15 @@ SUBROUTINE CONSTRUCTION
 ! ykchoi (15. 08. 06.)
 ! Following GxL, GxR terms should be modified as Shi et al.(2012) publication
 
-	GxL(1:Mloc1,1:Nloc)=HxL(1:Mloc1,1:Nloc)*    &
-	  ( UxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc) )*   &
-	  ( VxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xL(1:Mloc1,1:Nloc) )*   &
-	  Gamma3
+      GxL(1:Mloc1,1:Nloc)=HxL(1:Mloc1,1:Nloc)*    &
+        ( UxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc) )*   &
+        ( VxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xL(1:Mloc1,1:Nloc) )*   &
+        Gamma3
 
-	GxR(1:Mloc1,1:Nloc)=HxR(1:Mloc1,1:Nloc)*    &
-	  ( UxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc) )*   &
-	  ( VxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xR(1:Mloc1,1:Nloc) )*   &
-	  Gamma3
+      GxR(1:Mloc1,1:Nloc)=HxR(1:Mloc1,1:Nloc)*    &
+        ( UxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc) )*   &
+        ( VxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xR(1:Mloc1,1:Nloc) )*   &
+        Gamma3
 
 # else
 
@@ -635,15 +636,15 @@ SUBROUTINE CONSTRUCTION
 ! Following FyL, FyR terms should be modified as Shi et al.(2012) publication
 
 
-	FyL(1:Mloc,1:Nloc1)=HyL(1:Mloc,1:Nloc1)*   &
-	 ( UyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yL(1:Mloc,1:Nloc1) )*   &
-	 ( VyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yL(1:Mloc,1:Nloc1) )*   &
-	 Gamma3
+      FyL(1:Mloc,1:Nloc1)=HyL(1:Mloc,1:Nloc1)*   &
+       ( UyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yL(1:Mloc,1:Nloc1) )*   &
+       ( VyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yL(1:Mloc,1:Nloc1) )*   &
+       Gamma3
 
-	FyR(1:Mloc,1:Nloc1)=HyR(1:Mloc,1:Nloc1)*   &
-	 ( UyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yR(1:Mloc,1:Nloc1) )*   &
-	 ( VyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yR(1:Mloc,1:Nloc1) )*   &
-	 Gamma3
+      FyR(1:Mloc,1:Nloc1)=HyR(1:Mloc,1:Nloc1)*   &
+       ( UyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yR(1:Mloc,1:Nloc1) )*   &
+       ( VyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yR(1:Mloc,1:Nloc1) )*   &
+       Gamma3
 
 # else
      FyL=Gamma3*HyL*UyL*VyL*Gamma3
@@ -683,8 +684,8 @@ SUBROUTINE CONSTRUCTION
         +0.5*GRAV*((EtaRyR)*(EtaRyR)*Gamma3+2.0_SP*(EtaRyR)*(Depthy))
 # endif
 # endif
-	
-	deallocate( MASK9u, MASK9v )
+
+      deallocate( MASK9u, MASK9v )
      
 END SUBROUTINE CONSTRUCTION
 
@@ -711,7 +712,7 @@ SUBROUTINE CONSTRUCT_Y(M,N,N1,DY,Vin,Din,OutL,OutR,Kappa)
      REAL(SP),INTENT(IN),DIMENSION(M,N)::Vin,Din
      REAL(SP),INTENT(IN) :: Kappa
      REAL(SP),INTENT(OUT),DIMENSION(M,N1)::OutL,OutR
-
+     nop(Kappa)
 
 ![ykchoi (08/28/2016)
 ! The "kappa" is meaningless in above routines.
@@ -768,6 +769,7 @@ SUBROUTINE CONSTRUCT_X(M,M1,N,DX,Vin,Din,OutL,OutR,Kappa)
      REAL(SP),INTENT(IN),DIMENSION(M,N)::Vin,Din
      REAL(SP),INTENT(IN)::Kappa
      REAL(SP),INTENT(OUT),DIMENSION(M1,N)::OutL,OutR
+     nop(Kappa)
 
 ![ykchoi (08/28/2016)
 ! The "kappa" is meaningless in above routines.
@@ -775,7 +777,7 @@ SUBROUTINE CONSTRUCT_X(M,M1,N,DX,Vin,Din,OutL,OutR,Kappa)
 ! This is piecewise linear reconstruction using van Leer limiter (Zhou et al., 2001)
      DO J=1,N
         
-	  DO I=2,M
+        DO I=2,M
 # if defined (CARTESIAN)
           OutL(I,J) = Vin(I-1,J) + 0.5_SP*DX*Din(I-1,J)
           OutR(I,J) = Vin(I,J) - 0.5_SP*DX*Din(I,J)
@@ -816,15 +818,11 @@ END SUBROUTINE CONSTRUCT_X
 SUBROUTINE CONSTRUCTION_HO_minmod
      USE GLOBAL
      IMPLICIT NONE
-# if defined (CARTESIAN)
-     REAL(SP),DIMENSION(Mloc1,Nloc) :: DelxU4
-     REAL(SP),DIMENSION(Mloc,Nloc1) :: DelyV4
-# endif
-	
-![ykchoi	(09.07.2015)
+
+![ykchoi (09.07.2015)
      REAL(SP),ALLOCATABLE :: MASK9u(:,:), MASK9v(:,:)
      ALLOCATE( MASK9u(1:Mloc1,1:Nloc), MASK9v(1:Mloc,1:Nloc1) )
-	
+
      MASK9u(1:Mloc,1:Nloc)=MASK9(1:Mloc,1:Nloc)
      MASK9v(1:Mloc,1:Nloc)=MASK9(1:Mloc,1:Nloc)
      
@@ -849,16 +847,16 @@ SUBROUTINE CONSTRUCTION_HO_minmod
 # if defined (CARTESIAN)
      IF(DISPERSION)THEN
       CALL CONSTRUCT_HO_X_minmod(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,DX,MASK,U4,U4xL,U4xR)
-	  
-	!ykchoi :: Following V4xL, V4xR terms should be computed.
-	CALL CONSTRUCT_HO_X_minmod(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,DX,MASK,V4,V4xL,V4xR)  
+
+      !ykchoi :: Following V4xL, V4xR terms should be computed.
+      CALL CONSTRUCT_HO_X_minmod(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,DX,MASK,V4,V4xL,V4xR)  
      ENDIF
 
 !ykchoi (09.07.2015)
 !Followings are modified for Ghost cell at Mloc1, Nloc1
 
      PL(1:Mloc1,1:Nloc)=HUxL(1:Mloc1,1:Nloc) &
-     + Gamma1*MASK9u(1:Mloc1,1:Nloc)*HxL(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc)	
+     + Gamma1*MASK9u(1:Mloc1,1:Nloc)*HxL(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc)      
 
      PR(1:Mloc1,1:Nloc)=HUxR(1:Mloc1,1:Nloc) &
      + Gamma1*MASK9u(1:Mloc1,1:Nloc)*HxR(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc)
@@ -878,8 +876,8 @@ SUBROUTINE CONSTRUCTION_HO_minmod
      IF(DISPERSION)THEN
       CALL CONSTRUCT_HO_X_minmod(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,DX,MASK,U4,U4xL,U4xR)
 
-	!ykchoi :: Following V4xL, V4xR terms should be computed.
-	CALL CONSTRUCT_HO_X_minmod(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,DX,MASK,V4,V4xL,V4xR)
+      !ykchoi :: Following V4xL, V4xR terms should be computed.
+      CALL CONSTRUCT_HO_X_minmod(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,DX,MASK,V4,V4xL,V4xR)
      ENDIF
 
      PL(1:Mloc1,1:Nloc)=HUxL(1:Mloc1,1:Nloc) &
@@ -913,15 +911,15 @@ SUBROUTINE CONSTRUCTION_HO_minmod
 ! ykchoi (15. 08. 06.)
 ! Following GxL, GxR terms should be modified as Shi et al.(2012) publication
 
-	GxL(1:Mloc1,1:Nloc)=HxL(1:Mloc1,1:Nloc)*    &
-	  ( UxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc) )*   &
-	  ( VxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xL(1:Mloc1,1:Nloc) )*   &
-	  Gamma3
+      GxL(1:Mloc1,1:Nloc)=HxL(1:Mloc1,1:Nloc)*    &
+        ( UxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc) )*   &
+        ( VxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xL(1:Mloc1,1:Nloc) )*   &
+        Gamma3
 
-	GxR(1:Mloc1,1:Nloc)=HxR(1:Mloc1,1:Nloc)*    &
-	  ( UxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc) )*   &
-	  ( VxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xR(1:Mloc1,1:Nloc) )*   &
-	  Gamma3
+      GxR(1:Mloc1,1:Nloc)=HxR(1:Mloc1,1:Nloc)*    &
+        ( UxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc) )*   &
+        ( VxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xR(1:Mloc1,1:Nloc) )*   &
+        Gamma3
 
 # else
 
@@ -948,8 +946,8 @@ SUBROUTINE CONSTRUCTION_HO_minmod
      IF(DISPERSION)THEN
        CALL CONSTRUCT_HO_Y_minmod(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,DY,MASK,V4,V4yL,V4yR)
 
-	 !ykchoi :: Following U4yL, U4yR terms should be computed.
-	 CALL CONSTRUCT_HO_Y_minmod(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,DY,MASK,U4,U4yL,U4yR)
+       !ykchoi :: Following U4yL, U4yR terms should be computed.
+       CALL CONSTRUCT_HO_Y_minmod(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,DY,MASK,U4,U4yL,U4yR)
      ENDIF
 
      QL(1:Mloc,1:Nloc1)=HVyL(1:Mloc,1:Nloc1)   &
@@ -974,8 +972,8 @@ SUBROUTINE CONSTRUCTION_HO_minmod
      IF(DISPERSION)THEN
        CALL CONSTRUCT_HO_Y_minmod(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,DY,MASK,V4,V4yL,V4yR)
 
-	 !ykchoi :: Following U4yL, U4yR terms should be computed.
-	 CALL CONSTRUCT_HO_Y_minmod(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,DY,MASK,U4,U4yL,U4yR)
+       !ykchoi :: Following U4yL, U4yR terms should be computed.
+       CALL CONSTRUCT_HO_Y_minmod(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,DY,MASK,U4,U4yL,U4yR)
      ENDIF
 
      QL(1:Mloc,1:Nloc1)=HVyL(1:Mloc,1:Nloc1)   &
@@ -1009,15 +1007,15 @@ SUBROUTINE CONSTRUCTION_HO_minmod
 ! ykchoi (15. 08. 06.)
 ! Following FyL, FyR terms should be modified as Shi et al.(2012) publication
 
-	FyL(1:Mloc,1:Nloc1)=HyL(1:Mloc,1:Nloc1)*   &
-	 ( UyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yL(1:Mloc,1:Nloc1) )*   &
-	 ( VyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yL(1:Mloc,1:Nloc1) )*   &
-	 Gamma3
-   	
-	FyR(1:Mloc,1:Nloc1)=HyR(1:Mloc,1:Nloc1)*   &
-	 ( UyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yR(1:Mloc,1:Nloc1) )*   &
-	 ( VyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yR(1:Mloc,1:Nloc1) )*   &
-	 Gamma3
+      FyL(1:Mloc,1:Nloc1)=HyL(1:Mloc,1:Nloc1)*   &
+       ( UyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yL(1:Mloc,1:Nloc1) )*   &
+       ( VyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yL(1:Mloc,1:Nloc1) )*   &
+       Gamma3
+
+      FyR(1:Mloc,1:Nloc1)=HyR(1:Mloc,1:Nloc1)*   &
+       ( UyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yR(1:Mloc,1:Nloc1) )*   &
+       ( VyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yR(1:Mloc,1:Nloc1) )*   &
+       Gamma3
 
 # else
 
@@ -1026,7 +1024,7 @@ SUBROUTINE CONSTRUCTION_HO_minmod
 
 # endif
 
-	deallocate( MASK9u, MASK9v )   !ykchoi 
+      deallocate( MASK9u, MASK9v )   !ykchoi 
      
 END SUBROUTINE CONSTRUCTION_HO_minmod
 
@@ -1057,6 +1055,7 @@ SUBROUTINE CONSTRUCT_HO_X_minmod(M,N,M1,Ibeg,Iend,Jbeg,Jend,DX,MASK,Vin,OutL,Out
 
      REAL(SP),DIMENSION(M,N) :: Din
      REAL(SP) :: TXP1,TXP2,TXP3,TXP4,DVP1,DVP2,DVP3
+     nop(DX)
 
      ! estimate Din first
      Din=0.0_SP
@@ -1175,6 +1174,7 @@ SUBROUTINE CONSTRUCT_HO_Y_minmod(M,N,N1,Ibeg,Iend,Jbeg,Jend,DY,MASK,Vin,OutL,Out
 
      REAL(SP),DIMENSION(M,N) :: Din
      REAL(SP) :: TYP1,TYP2,TYP3,TYP4,DVP1,DVP2,DVP3
+     nop(DY)
 
      ! estimate Din first
      Din=0.0_SP
@@ -1327,7 +1327,7 @@ SUBROUTINE CONSTRUCTION_HO
 
      REAL(SP),ALLOCATABLE :: MASK9u(:,:), MASK9v(:,:)
      ALLOCATE( MASK9u(1:Mloc1,1:Nloc), MASK9v(1:Mloc,1:Nloc1) )
-	
+
      MASK9u(1:Mloc,1:Nloc)=MASK9(1:Mloc,1:Nloc)
      MASK9v(1:Mloc,1:Nloc)=MASK9(1:Mloc,1:Nloc)
      
@@ -1352,12 +1352,12 @@ SUBROUTINE CONSTRUCTION_HO
      IF(DISPERSION)THEN
 
       CALL CONSTRUCT_HO_X(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,MASK,U4,U4xL,U4xR)
-	CALL CONSTRUCT_HO_X(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,MASK,V4,V4xL,V4xR)  
+      CALL CONSTRUCT_HO_X(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,MASK,V4,V4xL,V4xR)  
 
      ENDIF
 
      PL(1:Mloc1,1:Nloc)=HUxL(1:Mloc1,1:Nloc) &
-     + Gamma1*MASK9u(1:Mloc1,1:Nloc)*HxL(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc)	
+     + Gamma1*MASK9u(1:Mloc1,1:Nloc)*HxL(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc)
 
      PR(1:Mloc1,1:Nloc)=HUxR(1:Mloc1,1:Nloc) &
      + Gamma1*MASK9u(1:Mloc1,1:Nloc)*HxR(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc)
@@ -1377,7 +1377,7 @@ SUBROUTINE CONSTRUCTION_HO
      IF(DISPERSION)THEN
 
       CALL CONSTRUCT_HO_X(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,MASK,U4,U4xL,U4xR)
-	CALL CONSTRUCT_HO_X(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,MASK,V4,V4xL,V4xR)
+      CALL CONSTRUCT_HO_X(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,MASK,V4,V4xL,V4xR)
 
      ENDIF
 
@@ -1409,15 +1409,15 @@ SUBROUTINE CONSTRUCTION_HO
 
 # if defined (CARTESIAN)
 
-	GxL(1:Mloc1,1:Nloc)=HxL(1:Mloc1,1:Nloc)*    &
-	  ( UxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc) )*   &
-	  ( VxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xL(1:Mloc1,1:Nloc) )*   &
-	  Gamma3
+      GxL(1:Mloc1,1:Nloc)=HxL(1:Mloc1,1:Nloc)*    &
+        ( UxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc) )*   &
+        ( VxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xL(1:Mloc1,1:Nloc) )*   &
+        Gamma3
 
-	GxR(1:Mloc1,1:Nloc)=HxR(1:Mloc1,1:Nloc)*    &
-	  ( UxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc) )*   &
-	  ( VxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xR(1:Mloc1,1:Nloc) )*   &
-	  Gamma3
+      GxR(1:Mloc1,1:Nloc)=HxR(1:Mloc1,1:Nloc)*    &
+        ( UxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc) )*   &
+        ( VxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xR(1:Mloc1,1:Nloc) )*   &
+        Gamma3
 
 # else
 
@@ -1444,7 +1444,7 @@ SUBROUTINE CONSTRUCTION_HO
      IF(DISPERSION)THEN
 
        CALL CONSTRUCT_HO_Y(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,MASK,V4,V4yL,V4yR)
-	 CALL CONSTRUCT_HO_Y(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,MASK,U4,U4yL,U4yR)
+       CALL CONSTRUCT_HO_Y(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,MASK,U4,U4yL,U4yR)
 
      ENDIF
 
@@ -1470,7 +1470,7 @@ SUBROUTINE CONSTRUCTION_HO
      IF(DISPERSION)THEN
 
        CALL CONSTRUCT_HO_Y(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,MASK,V4,V4yL,V4yR)
-	 CALL CONSTRUCT_HO_Y(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,MASK,U4,U4yL,U4yR)
+       CALL CONSTRUCT_HO_Y(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,MASK,U4,U4yL,U4yR)
 
      ENDIF
 
@@ -1502,15 +1502,15 @@ SUBROUTINE CONSTRUCTION_HO
 
 # if defined(CARTESIAN)
 
-	FyL(1:Mloc,1:Nloc1)=HyL(1:Mloc,1:Nloc1)*   &
-	 ( UyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yL(1:Mloc,1:Nloc1) )*   &
-	 ( VyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yL(1:Mloc,1:Nloc1) )*   &
-	 Gamma3
-   	
-	FyR(1:Mloc,1:Nloc1)=HyR(1:Mloc,1:Nloc1)*   &
-	 ( UyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yR(1:Mloc,1:Nloc1) )*   &
-	 ( VyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yR(1:Mloc,1:Nloc1) )*   &
-	 Gamma3
+      FyL(1:Mloc,1:Nloc1)=HyL(1:Mloc,1:Nloc1)*   &
+       ( UyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yL(1:Mloc,1:Nloc1) )*   &
+       ( VyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yL(1:Mloc,1:Nloc1) )*   &
+       Gamma3
+
+      FyR(1:Mloc,1:Nloc1)=HyR(1:Mloc,1:Nloc1)*   &
+       ( UyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yR(1:Mloc,1:Nloc1) )*   &
+       ( VyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yR(1:Mloc,1:Nloc1) )*   &
+       Gamma3
 
 # else
 
@@ -1519,7 +1519,7 @@ SUBROUTINE CONSTRUCTION_HO
 
 # endif
 
-	deallocate( MASK9u, MASK9v )
+      deallocate( MASK9u, MASK9v )
      
 ENDSUBROUTINE CONSTRUCTION_HO
 
@@ -1545,9 +1545,9 @@ SUBROUTINE CONSTRUCT_HO_X(M,N,M1,Ibeg,Iend,Jbeg,Jend,MASK,Vin,OutL,OutR)
      Din=0.0_SP
      DO J=Jbeg,Jend
         
-	  ! Fourth order MUSCL TVD with van Leer and minmod limiter
-	  ! The minmod limiter is used for the fourth order part in the fourth order scheme
-	  DO I=Ibeg-1,Iend+2
+        ! Fourth order MUSCL TVD with van Leer and minmod limiter
+        ! The minmod limiter is used for the fourth order part in the fourth order scheme
+        DO I=Ibeg-1,Iend+2
            TXP1=Vin(I-1,J)-Vin(I-2,J)
            TXP2=Vin(I,J)-Vin(I-1,J)
            TXP3=Vin(I+1,J)-Vin(I,J)
@@ -1600,11 +1600,11 @@ SUBROUTINE CONSTRUCT_HO_X(M,N,M1,Ibeg,Iend,Jbeg,Jend,MASK,Vin,OutL,OutR)
            Din(I,J)=TXP2-1.0_SP/6.0_SP*(DVP3-2.0_SP*DVP2+DVP1)
         ENDDO
 
-	  ! Fourth order MUSCL TVD with van Leer and minmod limiter
-	  ! The van-Leer limiter is used for the third order part in the fourth order scheme
+        ! Fourth order MUSCL TVD with van Leer and minmod limiter
+        ! The van-Leer limiter is used for the third order part in the fourth order scheme
         DO I=Ibeg,Iend+1
            TMP1 = Din(I-1,J);   TMP2 = Din(I,J);
-	  
+
            IF( ABS(TMP1).le.SMALL ) TMP1 = SMALL*SIGN( 1.0_SP, TMP1 )
            IF( ABS(TMP2).le.SMALL ) TMP2 = SMALL*SIGN( 1.0_SP, TMP2 )
            RAT = TMP2/TMP1
@@ -1617,7 +1617,7 @@ SUBROUTINE CONSTRUCT_HO_X(M,N,M1,Ibeg,Iend,Jbeg,Jend,MASK,Vin,OutL,OutR)
 
            OutL(I,J) = Vin(I-1,J) + ( 1.0_SP/6.0_SP )*( VAN1*TMP1 + 2.0_SP*VAN2*TMP2 )
 
-	     !!!!!!!!!!!!!!!
+           !!!!!!!!!!!!!!!
 
            TMP1 = Din(I,J);   TMP2 = Din(I+1,J);
 
@@ -1660,9 +1660,9 @@ SUBROUTINE CONSTRUCT_HO_Y(M,N,N1,Ibeg,Iend,Jbeg,Jend,MASK,Vin,OutL,OutR)
      Din=0.0_SP
      DO I=Ibeg,Iend
 
-	  ! Fourth order MUSCL TVD with van Leer and minmod limiter
-	  ! The minmod limiter is used for the fourth order part in the fourth order scheme
-     	  DO J=Jbeg-1,Jend+2
+        ! Fourth order MUSCL TVD with van Leer and minmod limiter
+        ! The minmod limiter is used for the fourth order part in the fourth order scheme
+        DO J=Jbeg-1,Jend+2
            TYP1=Vin(I,J-1)-Vin(I,J-2)
            TYP2=Vin(I,J)-Vin(I,J-1)
            TYP3=Vin(I,J+1)-Vin(I,J)
@@ -1713,16 +1713,16 @@ SUBROUTINE CONSTRUCT_HO_Y(M,N,N1,Ibeg,Iend,Jbeg,Jend,MASK,Vin,OutL,OutR)
            ENDIF
 
            Din(I,J)=TYP2-1.0_SP/6.0_SP*(DVP3-2.0_SP*DVP2+DVP1)
-     	  ENDDO
+        ENDDO
      
-	  ! Fourth order MUSCL TVD with van Leer and minmod limiter
-	  ! The van-Leer limiter is used for the third order part in the fourth order scheme
-	  DO J=Jbeg,Jend+1
+        ! Fourth order MUSCL TVD with van Leer and minmod limiter
+        ! The van-Leer limiter is used for the third order part in the fourth order scheme
+        DO J=Jbeg,Jend+1
            TMP1 = Din(I,J-1);   TMP2 = Din(I,J);
 
            IF( ABS(TMP1).le.SMALL ) TMP1 = SMALL*SIGN( 1.0_SP, TMP1 )
            IF( ABS(TMP2).le.SMALL ) TMP2 = SMALL*SIGN( 1.0_SP, TMP2 )
-           RAT = TMP2/TMP1	   
+           RAT = TMP2/TMP1
            VAN1 = 0.0_SP;
            IF( abs(1.0 + RAT) > SMALL ) VAN1 = ( RAT + ABS(RAT) )/( 1.0_SP + RAT)
 
@@ -1732,7 +1732,7 @@ SUBROUTINE CONSTRUCT_HO_Y(M,N,N1,Ibeg,Iend,Jbeg,Jend,MASK,Vin,OutL,OutR)
 
            OutL(I,J) = Vin(I,J-1) + ( 1.0_SP/6.0_SP )*( VAN1*TMP1 + 2.0_SP*VAN2*TMP2 )
 
-	   !!!!!!!!!!!!!!!
+           !!!!!!!!!!!!!!!
 
            TMP1 = Din(I,J);   TMP2 = Din(I,J+1);
 
@@ -1764,7 +1764,7 @@ SUBROUTINE CONSTRUCTION_HO_MLP
 
      REAL(SP),ALLOCATABLE :: MASK9u(:,:), MASK9v(:,:)
      ALLOCATE( MASK9u(1:Mloc1,1:Nloc), MASK9v(1:Mloc,1:Nloc1) )
-	
+
      MASK9u(1:Mloc,1:Nloc)=MASK9(1:Mloc,1:Nloc)
      MASK9v(1:Mloc,1:Nloc)=MASK9(1:Mloc,1:Nloc)
      
@@ -1785,12 +1785,12 @@ SUBROUTINE CONSTRUCTION_HO_MLP
      IF(DISPERSION)THEN
 
       CALL CONSTRUCT_HO_X_MLP(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,MASK,U4,U4xL,U4xR)
-	CALL CONSTRUCT_HO_X_MLP(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,MASK,V4,V4xL,V4xR)  
+      CALL CONSTRUCT_HO_X_MLP(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,MASK,V4,V4xL,V4xR)  
 
      ENDIF
 
      PL(1:Mloc1,1:Nloc)=HUxL(1:Mloc1,1:Nloc) &
-     + Gamma1*MASK9u(1:Mloc1,1:Nloc)*HxL(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc)	
+     + Gamma1*MASK9u(1:Mloc1,1:Nloc)*HxL(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc)      
 
      PR(1:Mloc1,1:Nloc)=HUxR(1:Mloc1,1:Nloc) &
      + Gamma1*MASK9u(1:Mloc1,1:Nloc)*HxR(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc)
@@ -1810,7 +1810,7 @@ SUBROUTINE CONSTRUCTION_HO_MLP
      IF(DISPERSION)THEN
 
       CALL CONSTRUCT_HO_X_MLP(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,MASK,U4,U4xL,U4xR)
-	CALL CONSTRUCT_HO_X_MLP(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,MASK,V4,V4xL,V4xR)
+      CALL CONSTRUCT_HO_X_MLP(Mloc,Nloc,Mloc1,Ibeg,Iend,Jbeg,Jend,MASK,V4,V4xL,V4xR)
 
      ENDIF
 
@@ -1842,15 +1842,15 @@ SUBROUTINE CONSTRUCTION_HO_MLP
 
 # if defined (CARTESIAN)
 
-	GxL(1:Mloc1,1:Nloc)=HxL(1:Mloc1,1:Nloc)*    &
-	  ( UxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc) )*   &
-	  ( VxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xL(1:Mloc1,1:Nloc) )*   &
-	  Gamma3
+      GxL(1:Mloc1,1:Nloc)=HxL(1:Mloc1,1:Nloc)*    &
+        ( UxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc) )*   &
+        ( VxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xL(1:Mloc1,1:Nloc) )*   &
+        Gamma3
 
-	GxR(1:Mloc1,1:Nloc)=HxR(1:Mloc1,1:Nloc)*    &
-	  ( UxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc) )*   &
-	  ( VxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xR(1:Mloc1,1:Nloc) )*   &
-	  Gamma3
+      GxR(1:Mloc1,1:Nloc)=HxR(1:Mloc1,1:Nloc)*    &
+        ( UxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc) )*   &
+        ( VxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xR(1:Mloc1,1:Nloc) )*   &
+        Gamma3
 
 # else
 
@@ -1873,7 +1873,7 @@ SUBROUTINE CONSTRUCTION_HO_MLP
      IF(DISPERSION)THEN
 
        CALL CONSTRUCT_HO_Y_MLP(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,MASK,V4,V4yL,V4yR)
-	 CALL CONSTRUCT_HO_Y_MLP(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,MASK,U4,U4yL,U4yR)
+       CALL CONSTRUCT_HO_Y_MLP(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,MASK,U4,U4yL,U4yR)
 
      ENDIF
 
@@ -1899,7 +1899,7 @@ SUBROUTINE CONSTRUCTION_HO_MLP
      IF(DISPERSION)THEN
 
        CALL CONSTRUCT_HO_Y_MLP(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,MASK,V4,V4yL,V4yR)
-	 CALL CONSTRUCT_HO_Y_MLP(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,MASK,U4,U4yL,U4yR)
+       CALL CONSTRUCT_HO_Y_MLP(Mloc,Nloc,Nloc1,Ibeg,Iend,Jbeg,Jend,MASK,U4,U4yL,U4yR)
 
      ENDIF
 
@@ -1931,15 +1931,15 @@ SUBROUTINE CONSTRUCTION_HO_MLP
 
 # if defined(CARTESIAN)
 
-	FyL(1:Mloc,1:Nloc1)=HyL(1:Mloc,1:Nloc1)*   &
-	 ( UyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yL(1:Mloc,1:Nloc1) )*   &
-	 ( VyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yL(1:Mloc,1:Nloc1) )*   &
-	 Gamma3
-   	
-	FyR(1:Mloc,1:Nloc1)=HyR(1:Mloc,1:Nloc1)*   &
-	 ( UyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yR(1:Mloc,1:Nloc1) )*   &
-	 ( VyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yR(1:Mloc,1:Nloc1) )*   &
-	 Gamma3
+      FyL(1:Mloc,1:Nloc1)=HyL(1:Mloc,1:Nloc1)*   &
+       ( UyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yL(1:Mloc,1:Nloc1) )*   &
+       ( VyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yL(1:Mloc,1:Nloc1) )*   &
+       Gamma3
+
+      FyR(1:Mloc,1:Nloc1)=HyR(1:Mloc,1:Nloc1)*   &
+       ( UyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yR(1:Mloc,1:Nloc1) )*   &
+       ( VyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yR(1:Mloc,1:Nloc1) )*   &
+       Gamma3
 
 # else
 
@@ -1948,7 +1948,7 @@ SUBROUTINE CONSTRUCTION_HO_MLP
 
 # endif
 
-	deallocate( MASK9u, MASK9v )
+      deallocate( MASK9u, MASK9v )
      
 ENDSUBROUTINE CONSTRUCTION_HO_MLP
 
@@ -1970,55 +1970,56 @@ SUBROUTINE CONSTRUCT_HO_X_MLP(M,N,M1,Ibeg,Iend,Jbeg,Jend,MASK,Vin,OutL,OutR)
      REAL(SP) :: delsol, tanth1, tanth2, gamRtanth2, gamLtanth1
      REAL(SP) :: alphLin, alphL, slopeL
      REAL(SP) :: alphRin, alphR, slopeR
+     nop(MASK)
 
-     smallv = 0.0000000001_SP	
-	
+     smallv = 0.0000000001_SP
+
      DO J=Jbeg,Jend
         
-	  ! MLP scheme
-	  DO I=Ibeg-1,Iend+2
+        ! MLP scheme
+        DO I=Ibeg-1,Iend+2
            TXP1=Vin(I-1,J)-Vin(I-2,J)
            TXP2=Vin(I,J)-Vin(I-1,J)
            TXP3=Vin(I+1,J)-Vin(I,J)
 
-	     gamL=TXP2/TXP1
-	     if( abs( TXP1 ) < smallv ) gamL=0.0_SP;
-	     betaL=( 1.0_SP + 2.0_SP*gamL )/3.0_SP 
+           gamL=TXP2/TXP1
+           if( abs( TXP1 ) < smallv ) gamL=0.0_SP;
+           betaL=( 1.0_SP + 2.0_SP*gamL )/3.0_SP 
 
-	     gamR=TXP2/TXP3
-		 if( abs( TXP3 ) < smallv ) gamR=0.0_SP;
-		 betaR=( 1.0_SP + 2.0_SP*gamR )/3.0_SP
+           gamR=TXP2/TXP3
+             if( abs( TXP3 ) < smallv ) gamR=0.0_SP;
+             betaR=( 1.0_SP + 2.0_SP*gamR )/3.0_SP
 
-	     delsol = Vin(I,J)-Vin(I-2,J)
-		 tanth1 = abs( ( Vin(I-1,J+1)-Vin(I-1,J-1) )/delsol )
-	     if( abs( delsol ) < smallv ) tanth1 = 0.0_SP
+           delsol = Vin(I,J)-Vin(I-2,J)
+             tanth1 = abs( ( Vin(I-1,J+1)-Vin(I-1,J-1) )/delsol )
+           if( abs( delsol ) < smallv ) tanth1 = 0.0_SP
 
-		 delsol = Vin(I+1,J)-Vin(I-1,J)
-		 tanth2 = abs( ( Vin(I,J+1)-Vin(I,J-1) )/delsol )
-		 if( abs( delsol ) < smallv ) tanth2 = 0.0_SP
+             delsol = Vin(I+1,J)-Vin(I-1,J)
+             tanth2 = abs( ( Vin(I,J+1)-Vin(I,J-1) )/delsol )
+             if( abs( delsol ) < smallv ) tanth2 = 0.0_SP
 
-		 gamRtanth2 = tanth2/gamR;
-		 if( abs(gamR) < smallv ) gamRtanth2 = 0.0_SP
+             gamRtanth2 = tanth2/gamR;
+             if( abs(gamR) < smallv ) gamRtanth2 = 0.0_SP
 
-		 alphLin = 2.0_SP*max( 1.0_SP, gamL )   &
-		    *( 1.0_SP + max( 0.0_SP, gamRtanth2 ) )/(1.0_SP + tanth1)
-	     alphL = max( 1.0_SP, min(2.0_SP, alphLin) );
+             alphLin = 2.0_SP*max( 1.0_SP, gamL )   &
+                *( 1.0_SP + max( 0.0_SP, gamRtanth2 ) )/(1.0_SP + tanth1)
+           alphL = max( 1.0_SP, min(2.0_SP, alphLin) );
 
-		 slopeL=max( 0.0_SP,min( alphL*gamL, min(alphL,betaL) ) )
-		 
-	     OutL(I,J) = Vin(I-1,J) + 0.5_SP*slopeL*Txp1
+             slopeL=max( 0.0_SP,min( alphL*gamL, min(alphL,betaL) ) )
+
+             OutL(I,J) = Vin(I-1,J) + 0.5_SP*slopeL*Txp1
 
 
-		 gamLtanth1 = tanth1/gamL;
-		 if( abs( gamL ) < smallv ) gamLtanth1 = 0.0_SP;
+             gamLtanth1 = tanth1/gamL;
+             if( abs( gamL ) < smallv ) gamLtanth1 = 0.0_SP;
 
-		 alphRin = 2.0_SP*max( 1.0_SP, gamR )   &
-		    *( 1.0_SP + max( 0.0_SP, gamLtanth1 ) )/(1.0_SP + tanth2)
-		 alphR = max( 1.0_SP, min( 2.0_SP, alphRin ) )
+             alphRin = 2.0_SP*max( 1.0_SP, gamR )   &
+                *( 1.0_SP + max( 0.0_SP, gamLtanth1 ) )/(1.0_SP + tanth2)
+             alphR = max( 1.0_SP, min( 2.0_SP, alphRin ) )
 
-		 slopeR = max( 0.0_SP, min( alphR*gamR, min(alphR, betaR) ) )
+             slopeR = max( 0.0_SP, min( alphR*gamR, min(alphR, betaR) ) )
 
-	     OutR(I,J) = Vin(I,J) - 0.5_SP*slopeR*Txp3
+           OutR(I,J) = Vin(I,J) - 0.5_SP*slopeR*Txp3
 
         ENDDO
 
@@ -2044,56 +2045,57 @@ SUBROUTINE CONSTRUCT_HO_Y_MLP(M,N,N1,Ibeg,Iend,Jbeg,Jend,MASK,Vin,OutL,OutR)
      REAL(SP) :: delsol, tanth1, tanth2, gamRtanth2, gamLtanth1
      REAL(SP) :: alphLin, alphL, slopeL
      REAL(SP) :: alphRin, alphR, slopeR
+     nop(MASK)
 
-     smallv = 0.0000000001_SP	
+     smallv = 0.0000000001_SP
 
      DO I=Ibeg,Iend
 
-	  ! MLP scheme
-     	  DO J=Jbeg-1,Jend+2
+        ! MLP scheme
+        DO J=Jbeg-1,Jend+2
 
            TYP1=Vin(I,J-1)-Vin(I,J-2)
            TYP2=Vin(I,J)-Vin(I,J-1)
            TYP3=Vin(I,J+1)-Vin(I,J)
 
-	     gamL=TYP2/TYP1
-		 if( abs( TYP1 ) < smallv ) gamL=0.0_SP
-		 betaL=( 1.0_SP + 2.0_SP*gamL )/3.0_SP
+           gamL=TYP2/TYP1
+             if( abs( TYP1 ) < smallv ) gamL=0.0_SP
+             betaL=( 1.0_SP + 2.0_SP*gamL )/3.0_SP
 
-		 gamR=TYP2/TYP3
-		 if( abs( TYP3 ) < smallv ) gamR=0.0_SP
-		 betaR=( 1.0_SP + 2.0_SP*gamR )/3.0_SP
+             gamR=TYP2/TYP3
+             if( abs( TYP3 ) < smallv ) gamR=0.0_SP
+             betaR=( 1.0_SP + 2.0_SP*gamR )/3.0_SP
 
-	     delsol = Vin(I,J)-Vin(I,J-2)
-		 tanth1 = abs( ( Vin(I+1,J-1)-Vin(I-1,J-1) )/delsol )
-		 if( abs( delsol ) < smallv ) tanth1 = 0.0_SP
+           delsol = Vin(I,J)-Vin(I,J-2)
+             tanth1 = abs( ( Vin(I+1,J-1)-Vin(I-1,J-1) )/delsol )
+             if( abs( delsol ) < smallv ) tanth1 = 0.0_SP
 
-		 delsol = Vin(I,J+1)-Vin(I,J-1)
-		 tanth2 = abs( ( Vin(I+1,J)-Vin(I-1,J) )/delsol )
-		 if( abs( delsol ) < smallv ) tanth2 = 0.0_SP
+             delsol = Vin(I,J+1)-Vin(I,J-1)
+             tanth2 = abs( ( Vin(I+1,J)-Vin(I-1,J) )/delsol )
+             if( abs( delsol ) < smallv ) tanth2 = 0.0_SP
 
-		 gamRtanth2 = tanth2/gamR;
-		 if( abs(gamR) < smallv ) gamRtanth2 = 0.0_SP
-		 
-		 alphLin = 2.0_SP*max( 1.0_SP, gamL )   &
-		    *( 1.0_SP + max( 0.0_SP, gamRtanth2 ) )/(1.0_SP + tanth1)
-	     alphL = max( 1.0_SP, min(2.0_SP, alphLin) )
+             gamRtanth2 = tanth2/gamR;
+             if( abs(gamR) < smallv ) gamRtanth2 = 0.0_SP
+             
+             alphLin = 2.0_SP*max( 1.0_SP, gamL )   &
+                *( 1.0_SP + max( 0.0_SP, gamRtanth2 ) )/(1.0_SP + tanth1)
+           alphL = max( 1.0_SP, min(2.0_SP, alphLin) )
 
-	     slopeL=max( 0.0_SP,min( alphL*gamL, min(alphL,betaL) ) )
+           slopeL=max( 0.0_SP,min( alphL*gamL, min(alphL,betaL) ) )
 
-	     OutL(I,J) = Vin(I,J-1) + 0.5_SP*slopeL*Typ1
+           OutL(I,J) = Vin(I,J-1) + 0.5_SP*slopeL*Typ1
 
 
-		 gamLtanth1 = tanth1/gamL;
-		 if( abs( gamL ) < smallv ) gamLtanth1 = 0.0_SP;
+             gamLtanth1 = tanth1/gamL;
+             if( abs( gamL ) < smallv ) gamLtanth1 = 0.0_SP;
 
-		 alphRin = 2.0_SP*max( 1.0_SP, gamR )   &
-		    *( 1.0_SP + max( 0.0_SP, gamLtanth1 ) )/(1.0_SP + tanth2)
-		 alphR = max( 1.0_SP, min( 2.0_SP, alphRin ) )
+             alphRin = 2.0_SP*max( 1.0_SP, gamR )   &
+                *( 1.0_SP + max( 0.0_SP, gamLtanth1 ) )/(1.0_SP + tanth2)
+             alphR = max( 1.0_SP, min( 2.0_SP, alphRin ) )
 
-		 slopeR = max( 0.0_SP, min( alphR*gamR, min(alphR, betaR) ) )
+             slopeR = max( 0.0_SP, min( alphR*gamR, min(alphR, betaR) ) )
 
-	     OutR(I,J) = Vin(I,J) - 0.5_SP*slopeR*Typ3
+           OutR(I,J) = Vin(I,J) - 0.5_SP*slopeR*Typ3
 
         ENDDO
 
@@ -2124,7 +2126,7 @@ SUBROUTINE CONSTRUCTION_WENO
 
      REAL(SP),ALLOCATABLE :: MASK9u(:,:), MASK9v(:,:)
      ALLOCATE( MASK9u(1:Mloc1,1:Nloc), MASK9v(1:Mloc,1:Nloc1) )
-	
+
      MASK9u(1:Mloc,1:Nloc)=MASK9(1:Mloc,1:Nloc)
      MASK9v(1:Mloc,1:Nloc)=MASK9(1:Mloc,1:Nloc)
      
@@ -2144,11 +2146,11 @@ SUBROUTINE CONSTRUCTION_WENO
 # if defined (CARTESIAN)
      IF(DISPERSION)THEN
       CALL WENO_CONSTRUCT_X(Mloc, Nloc, Mloc1, Ibeg, Iend, Jbeg, Jend, U4, U4xL, U4xR)
-	CALL WENO_CONSTRUCT_X(Mloc, Nloc, Mloc1, Ibeg, Iend, Jbeg, Jend, V4, V4xL, V4xR)  
+      CALL WENO_CONSTRUCT_X(Mloc, Nloc, Mloc1, Ibeg, Iend, Jbeg, Jend, V4, V4xL, V4xR)  
      ENDIF
 
      PL(1:Mloc1,1:Nloc)=HUxL(1:Mloc1,1:Nloc) &
-     + Gamma1*MASK9u(1:Mloc1,1:Nloc)*HxL(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc)	
+     + Gamma1*MASK9u(1:Mloc1,1:Nloc)*HxL(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc)
 
      PR(1:Mloc1,1:Nloc)=HUxR(1:Mloc1,1:Nloc) &
      + Gamma1*MASK9u(1:Mloc1,1:Nloc)*HxR(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc)
@@ -2167,7 +2169,7 @@ SUBROUTINE CONSTRUCTION_WENO
 # if defined(ZALPHA)
      IF(DISPERSION)THEN
       CALL WENO_CONSTRUCT_X(Mloc, Nloc, Mloc1, Ibeg, Iend, Jbeg, Jend, U4, U4xL, U4xR)
-  	CALL WENO_CONSTRUCT_X(Mloc, Nloc, Mloc1, Ibeg, Iend, Jbeg, Jend, V4, V4xL, V4xR)
+        CALL WENO_CONSTRUCT_X(Mloc, Nloc, Mloc1, Ibeg, Iend, Jbeg, Jend, V4, V4xL, V4xR)
      ENDIF
 
      PL(1:Mloc1,1:Nloc)=HUxL(1:Mloc1,1:Nloc) &
@@ -2196,15 +2198,15 @@ SUBROUTINE CONSTRUCTION_WENO
 # endif
 # endif
 
-	GxL(1:Mloc1,1:Nloc)=HxL(1:Mloc1,1:Nloc)*    &
-	  ( UxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc) )*   &
-	  ( VxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xL(1:Mloc1,1:Nloc) )*   &
-	  Gamma3
+      GxL(1:Mloc1,1:Nloc)=HxL(1:Mloc1,1:Nloc)*    &
+        ( UxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xL(1:Mloc1,1:Nloc) )*   &
+        ( VxL(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xL(1:Mloc1,1:Nloc) )*   &
+        Gamma3
 
-	GxR(1:Mloc1,1:Nloc)=HxR(1:Mloc1,1:Nloc)*    &
-	  ( UxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc) )*   &
-	  ( VxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xR(1:Mloc1,1:Nloc) )*   &
-	  Gamma3
+      GxR(1:Mloc1,1:Nloc)=HxR(1:Mloc1,1:Nloc)*    &
+        ( UxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*U4xR(1:Mloc1,1:Nloc) )*   &
+        ( VxR(1:Mloc1,1:Nloc) + Gamma1*MASK9u(1:Mloc1,1:Nloc)*V4xR(1:Mloc1,1:Nloc) )*   &
+        Gamma3
 
 ! construct in y-direction
      CALL WENO_CONSTRUCT_Y(Mloc, Nloc, Nloc1, Ibeg, Iend, Jbeg, Jend, U, UyL, UyR)
@@ -2219,7 +2221,7 @@ SUBROUTINE CONSTRUCTION_WENO
 # if defined (CARTESIAN)
      IF(DISPERSION)THEN
       CALL WENO_CONSTRUCT_Y(Mloc, Nloc, Nloc1, Ibeg, Iend, Jbeg, Jend, V4, V4yL, V4yR)
-	CALL WENO_CONSTRUCT_Y(Mloc, Nloc, Nloc1, Ibeg, Iend, Jbeg, Jend, U4, U4yL, U4yR)
+      CALL WENO_CONSTRUCT_Y(Mloc, Nloc, Nloc1, Ibeg, Iend, Jbeg, Jend, U4, U4yL, U4yR)
      ENDIF
 
      QL(1:Mloc,1:Nloc1)=HVyL(1:Mloc,1:Nloc1)   &
@@ -2243,7 +2245,7 @@ SUBROUTINE CONSTRUCTION_WENO
 # if defined (ZALPHA)
      IF(DISPERSION)THEN
       CALL WENO_CONSTRUCT_Y(Mloc, Nloc, Nloc1, Ibeg, Iend, Jbeg, Jend, V4, V4yL, V4yR)
-	CALL WENO_CONSTRUCT_Y(Mloc, Nloc, Nloc1, Ibeg, Iend, Jbeg, Jend, U4, U4yL, U4yR)
+      CALL WENO_CONSTRUCT_Y(Mloc, Nloc, Nloc1, Ibeg, Iend, Jbeg, Jend, U4, U4yL, U4yR)
      ENDIF
 
      QL(1:Mloc,1:Nloc1)=HVyL(1:Mloc,1:Nloc1)   &
@@ -2272,17 +2274,17 @@ SUBROUTINE CONSTRUCTION_WENO
 # endif
 # endif
 
-	FyL(1:Mloc,1:Nloc1)=HyL(1:Mloc,1:Nloc1)*   &
-	 ( UyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yL(1:Mloc,1:Nloc1) )*   &
-	 ( VyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yL(1:Mloc,1:Nloc1) )*   &
-	 Gamma3
+      FyL(1:Mloc,1:Nloc1)=HyL(1:Mloc,1:Nloc1)*   &
+       ( UyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yL(1:Mloc,1:Nloc1) )*   &
+       ( VyL(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yL(1:Mloc,1:Nloc1) )*   &
+       Gamma3
 
-	FyR(1:Mloc,1:Nloc1)=HyR(1:Mloc,1:Nloc1)*   &
-	 ( UyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yR(1:Mloc,1:Nloc1) )*   &
-	 ( VyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yR(1:Mloc,1:Nloc1) )*   &
-	 Gamma3
+      FyR(1:Mloc,1:Nloc1)=HyR(1:Mloc,1:Nloc1)*   &
+       ( UyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*U4yR(1:Mloc,1:Nloc1) )*   &
+       ( VyR(1:Mloc,1:Nloc1) + Gamma1*MASK9v(1:Mloc,1:Nloc1)*V4yR(1:Mloc,1:Nloc1) )*   &
+       Gamma3
 
-	deallocate( MASK9u, MASK9v )
+      deallocate( MASK9u, MASK9v )
 
 ENDSUBROUTINE CONSTRUCTION_WENO
   ! I remove the option for spherical
@@ -2306,76 +2308,76 @@ SUBROUTINE WENO_CONSTRUCT_X( M, N, M1, Ibeg, Iend, Jbeg, Jend, Vin, OutL, OutR )
      REAL(SP),INTENT(IN),DIMENSION(M,N) :: Vin
      REAL(SP),INTENT(OUT),DIMENSION(M1,N) :: OutL, OutR
 
-	 REAL(SP) :: WNEPS, R0_R, R1_R, R2_R, R0_L, R1_L, R2_L, BETACOEF1, BETACOEF2
-	 REAL(SP) :: WBETA0, WBETA1, WBETA2
-	 REAL(SP) :: TXP1, TXP2, TXP3, W0BAR, W1BAR, W2BAR, WNW0, WNW1, WNW2
-	 REAL(SP) :: WNP0, WNP1, WNP2
+       REAL(SP) :: WNEPS, R0_R, R1_R, R2_R, R0_L, R1_L, R2_L, BETACOEF1, BETACOEF2
+       REAL(SP) :: WBETA0, WBETA1, WBETA2
+       REAL(SP) :: TXP1, TXP2, TXP3, W0BAR, W1BAR, W2BAR, WNW0, WNW1, WNW2
+       REAL(SP) :: WNP0, WNP1, WNP2
 
-	 WNEPS = 1.0E-06
-	 R0_R = 3.0_SP/10.0_SP;  R1_R = 3.0_SP/5.0_SP;  R2_R = 1.0_SP/10.0_SP;
-	 R0_L = 1.0_SP/10.0_SP;  R1_L = 3.0_SP/5.0_SP;  R2_L = 3.0_SP/10.0_SP;
+       WNEPS = 1.0E-06
+       R0_R = 3.0_SP/10.0_SP;  R1_R = 3.0_SP/5.0_SP;  R2_R = 1.0_SP/10.0_SP;
+       R0_L = 1.0_SP/10.0_SP;  R1_L = 3.0_SP/5.0_SP;  R2_L = 3.0_SP/10.0_SP;
 
-	 BETACOEF1 = 13.0_SP/12.0_SP;   BETACOEF2 = 1.0_SP/4.0_SP;
+       BETACOEF1 = 13.0_SP/12.0_SP;   BETACOEF2 = 1.0_SP/4.0_SP;
 
      DO J=Jbeg,Jend
         DO I=Ibeg,Iend+1
-		   
-		   TXP1 = VIN(I-2,J) - 2.0_SP*VIN(I-1,J) + VIN(I,J)
-		   TXP2 = VIN(I-2,J) - 4.0_SP*VIN(I-1,J) + 3.0_SP*VIN(I,J)
-		   WBETA0 = BETACOEF1*TXP1*TXP1 + BETACOEF2*TXP2*TXP2
 
-		   TXP1 = VIN(I-1,J) - 2.0_SP*VIN(I,J) + VIN(I+1,J)
-		   TXP2 = VIN(I-1,J) - VIN(I+1,J)
-		   WBETA1 = BETACOEF1*TXP1*TXP1 + BETACOEF2*TXP2*TXP2
+               TXP1 = VIN(I-2,J) - 2.0_SP*VIN(I-1,J) + VIN(I,J)
+               TXP2 = VIN(I-2,J) - 4.0_SP*VIN(I-1,J) + 3.0_SP*VIN(I,J)
+               WBETA0 = BETACOEF1*TXP1*TXP1 + BETACOEF2*TXP2*TXP2
 
-		   TXP1 = VIN(I,J) - 2.0_SP*VIN(I+1,J) + VIN(I+2,J)
-		   TXP2 = 3.0_SP*VIN(I,J) - 4.0_SP*VIN(I+1,J) + VIN(I+2,J)
-		   WBETA2 = BETACOEF1*TXP1*TXP1 + BETACOEF2*TXP2*TXP2
+               TXP1 = VIN(I-1,J) - 2.0_SP*VIN(I,J) + VIN(I+1,J)
+               TXP2 = VIN(I-1,J) - VIN(I+1,J)
+               WBETA1 = BETACOEF1*TXP1*TXP1 + BETACOEF2*TXP2*TXP2
 
-		   W0BAR = R0_R/( (WNEPS + WBETA0)*(WNEPS + WBETA0) )
-		   W1BAR = R1_R/( (WNEPS + WBETA1)*(WNEPS + WBETA1) )
-		   W2BAR = R2_R/( (WNEPS + WBETA2)*(WNEPS + WBETA2) )
+               TXP1 = VIN(I,J) - 2.0_SP*VIN(I+1,J) + VIN(I+2,J)
+               TXP2 = 3.0_SP*VIN(I,J) - 4.0_SP*VIN(I+1,J) + VIN(I+2,J)
+               WBETA2 = BETACOEF1*TXP1*TXP1 + BETACOEF2*TXP2*TXP2
 
-		   TXP3 = W0BAR + W1BAR + W2BAR
-		   WNW0 = W0BAR/TXP3
-		   WNW1 = W1BAR/TXP3
-		   WNW2 = W2BAR/TXP3
+               W0BAR = R0_R/( (WNEPS + WBETA0)*(WNEPS + WBETA0) )
+               W1BAR = R1_R/( (WNEPS + WBETA1)*(WNEPS + WBETA1) )
+               W2BAR = R2_R/( (WNEPS + WBETA2)*(WNEPS + WBETA2) )
 
-		   WNP0 = -(1.0_SP/6.0_SP)*VIN(I-2,J) + (5.0_SP/6.0_SP)*VIN(I-1,J) + (1.0_SP/3.0_SP)*VIN(I,J)
-		   WNP1 = (1.0_SP/3.0_SP)*VIN(I-1,J) + (5.0_SP/6.0_SP)*VIN(I,J) - (1.0_SP/6.0_SP)*VIN(I+1,J)
-		   WNP2 = (11.0_SP/6.0_SP)*VIN(I,J) - (7.0_SP/6.0_SP)*VIN(I+1,J) + (1.0_SP/3.0_SP)*VIN(I+2,J)
+               TXP3 = W0BAR + W1BAR + W2BAR
+               WNW0 = W0BAR/TXP3
+               WNW1 = W1BAR/TXP3
+               WNW2 = W2BAR/TXP3
 
-		   OutR(I,J) = WNW0*WNP0 + WNW1*WNP1 + WNW2*WNP2
-		   !================================================
+               WNP0 = -(1.0_SP/6.0_SP)*VIN(I-2,J) + (5.0_SP/6.0_SP)*VIN(I-1,J) + (1.0_SP/3.0_SP)*VIN(I,J)
+               WNP1 = (1.0_SP/3.0_SP)*VIN(I-1,J) + (5.0_SP/6.0_SP)*VIN(I,J) - (1.0_SP/6.0_SP)*VIN(I+1,J)
+               WNP2 = (11.0_SP/6.0_SP)*VIN(I,J) - (7.0_SP/6.0_SP)*VIN(I+1,J) + (1.0_SP/3.0_SP)*VIN(I+2,J)
 
-		   TXP1 = VIN(I-3,J) - 2.0_SP*VIN(I-2,J) + VIN(I-1,J)
-		   TXP2 = VIN(I-3,J) - 4.0_SP*VIN(I-2,J) + 3.0_SP*VIN(I-1,J)
-		   WBETA0 = BETACOEF1*TXP1*TXP1 + BETACOEF2*TXP2*TXP2
+               OutR(I,J) = WNW0*WNP0 + WNW1*WNP1 + WNW2*WNP2
+               !================================================
 
-		   TXP1 = VIN(I-2,J) - 2.0_SP*VIN(I-1,J) + VIN(I,J)
-		   TXP2 = VIN(I-2,J) - VIN(I,J)
-		   WBETA1 = BETACOEF1*TXP1*TXP1 + BETACOEF2*TXP2*TXP2
+               TXP1 = VIN(I-3,J) - 2.0_SP*VIN(I-2,J) + VIN(I-1,J)
+               TXP2 = VIN(I-3,J) - 4.0_SP*VIN(I-2,J) + 3.0_SP*VIN(I-1,J)
+               WBETA0 = BETACOEF1*TXP1*TXP1 + BETACOEF2*TXP2*TXP2
 
-		   TXP1 = VIN(I-1,J) - 2.0_SP*VIN(I,J) + VIN(I+1,J)
-		   TXP2 = 3.0_SP*VIN(I-1,J) - 4.0_SP*VIN(I,J) + VIN(I+1,J)
-		   WBETA2 = BETACOEF1*TXP1*TXP1 + BETACOEF2*TXP2*TXP2
+               TXP1 = VIN(I-2,J) - 2.0_SP*VIN(I-1,J) + VIN(I,J)
+               TXP2 = VIN(I-2,J) - VIN(I,J)
+               WBETA1 = BETACOEF1*TXP1*TXP1 + BETACOEF2*TXP2*TXP2
 
-		   W0BAR = R0_L/( (WNEPS + WBETA0)*(WNEPS + WBETA0) )
-		   W1BAR = R1_L/( (WNEPS + WBETA1)*(WNEPS + WBETA1) )
-		   W2BAR = R2_L/( (WNEPS + WBETA2)*(WNEPS + WBETA2) )
+               TXP1 = VIN(I-1,J) - 2.0_SP*VIN(I,J) + VIN(I+1,J)
+               TXP2 = 3.0_SP*VIN(I-1,J) - 4.0_SP*VIN(I,J) + VIN(I+1,J)
+               WBETA2 = BETACOEF1*TXP1*TXP1 + BETACOEF2*TXP2*TXP2
 
-		   TXP3 = W0BAR + W1BAR + W2BAR
-		   WNW0 = W0BAR/TXP3
-		   WNW1 = W1BAR/TXP3
-		   WNW2 = W2BAR/TXP3
+               W0BAR = R0_L/( (WNEPS + WBETA0)*(WNEPS + WBETA0) )
+               W1BAR = R1_L/( (WNEPS + WBETA1)*(WNEPS + WBETA1) )
+               W2BAR = R2_L/( (WNEPS + WBETA2)*(WNEPS + WBETA2) )
 
-		   WNP0 = (1.0_SP/3.0_SP)*VIN(I-3,J) - (7.0_SP/6.0_SP)*VIN(I-2,J) + (11.0_SP/6.0_SP)*VIN(I-1,J)
-		   WNP1 = -(1.0_SP/6.0_SP)*VIN(I-2,J) + (5.0_SP/6.0_SP)*VIN(I-1,J) + (1.0_SP/3.0_SP)*VIN(I,J)
-		   WNP2 = (1.0_SP/3.0_SP)*VIN(I-1,J) + (5.0_SP/6.0_SP)*VIN(I,J) - (1.0_SP/6.0_SP)*VIN(I+1,J)
+               TXP3 = W0BAR + W1BAR + W2BAR
+               WNW0 = W0BAR/TXP3
+               WNW1 = W1BAR/TXP3
+               WNW2 = W2BAR/TXP3
 
-		   OutL(I,J) = WNW0*WNP0 + WNW1*WNP1 + WNW2*WNP2
+               WNP0 = (1.0_SP/3.0_SP)*VIN(I-3,J) - (7.0_SP/6.0_SP)*VIN(I-2,J) + (11.0_SP/6.0_SP)*VIN(I-1,J)
+               WNP1 = -(1.0_SP/6.0_SP)*VIN(I-2,J) + (5.0_SP/6.0_SP)*VIN(I-1,J) + (1.0_SP/3.0_SP)*VIN(I,J)
+               WNP2 = (1.0_SP/3.0_SP)*VIN(I-1,J) + (5.0_SP/6.0_SP)*VIN(I,J) - (1.0_SP/6.0_SP)*VIN(I+1,J)
 
-		ENDDO
+               OutL(I,J) = WNW0*WNP0 + WNW1*WNP1 + WNW2*WNP2
+
+            ENDDO
      ENDDO
 
 ENDSUBROUTINE WENO_CONSTRUCT_X
@@ -2397,76 +2399,76 @@ SUBROUTINE WENO_CONSTRUCT_Y( M, N, N1, Ibeg, Iend, Jbeg, Jend, Vin, OutL, OutR )
      REAL(SP),INTENT(IN),DIMENSION(M,N) :: Vin
      REAL(SP),INTENT(OUT),DIMENSION(M,N1) :: OutL, OutR
 
-	 REAL(SP) :: WNEPS, R0_R, R1_R, R2_R, R0_L, R1_L, R2_L, BETACOEF1, BETACOEF2
-	 REAL(SP) :: WBETA0, WBETA1, WBETA2
-	 REAL(SP) :: TYP1, TYP2, TYP3, W0BAR, W1BAR, W2BAR, WNW0, WNW1, WNW2
-	 REAL(SP) :: WNP0, WNP1, WNP2
+       REAL(SP) :: WNEPS, R0_R, R1_R, R2_R, R0_L, R1_L, R2_L, BETACOEF1, BETACOEF2
+       REAL(SP) :: WBETA0, WBETA1, WBETA2
+       REAL(SP) :: TYP1, TYP2, TYP3, W0BAR, W1BAR, W2BAR, WNW0, WNW1, WNW2
+       REAL(SP) :: WNP0, WNP1, WNP2
 
-	 WNEPS = 1.0E-06
-	 R0_R = 3.0_SP/10.0_SP;  R1_R = 3.0_SP/5.0_SP;  R2_R = 1.0_SP/10.0_SP;
-	 R0_L = 1.0_SP/10.0_SP;  R1_L = 3.0_SP/5.0_SP;  R2_L = 3.0_SP/10.0_SP;
+       WNEPS = 1.0E-06
+       R0_R = 3.0_SP/10.0_SP;  R1_R = 3.0_SP/5.0_SP;  R2_R = 1.0_SP/10.0_SP;
+       R0_L = 1.0_SP/10.0_SP;  R1_L = 3.0_SP/5.0_SP;  R2_L = 3.0_SP/10.0_SP;
 
-	 BETACOEF1 = 13.0_SP/12.0_SP;   BETACOEF2 = 1.0_SP/4.0_SP;
+       BETACOEF1 = 13.0_SP/12.0_SP;   BETACOEF2 = 1.0_SP/4.0_SP;
 
      DO J=Jbeg,Jend+1
         DO I=Ibeg,Iend
 
-		   TYP1 = VIN(I,J-2) - 2.0_SP*VIN(I,J-1) + VIN(I,J)
-		   TYP2 = VIN(I,J-2) - 4.0_SP*VIN(I,J-1) + 3.0_SP*VIN(I,J)
-		   WBETA0 = BETACOEF1*TYP1*TYP1 + BETACOEF2*TYP2*TYP2
+               TYP1 = VIN(I,J-2) - 2.0_SP*VIN(I,J-1) + VIN(I,J)
+               TYP2 = VIN(I,J-2) - 4.0_SP*VIN(I,J-1) + 3.0_SP*VIN(I,J)
+               WBETA0 = BETACOEF1*TYP1*TYP1 + BETACOEF2*TYP2*TYP2
 
-		   TYP1 = VIN(I,J-1) - 2.0_SP*VIN(I,J) + VIN(I,J+1)
-		   TYP2 = VIN(I,J-1) - VIN(I,J+1)
-		   WBETA1 = BETACOEF1*TYP1*TYP1 + BETACOEF2*TYP2*TYP2
+               TYP1 = VIN(I,J-1) - 2.0_SP*VIN(I,J) + VIN(I,J+1)
+               TYP2 = VIN(I,J-1) - VIN(I,J+1)
+               WBETA1 = BETACOEF1*TYP1*TYP1 + BETACOEF2*TYP2*TYP2
 
-		   TYP1 = VIN(I,J) - 2.0_SP*VIN(I,J+1) + VIN(I,J+2)
-		   TYP2 = 3.0_SP*VIN(I,J) - 4.0_SP*VIN(I,J+1) + VIN(I,J+2)
-		   WBETA2 = BETACOEF1*TYP1*TYP1 + BETACOEF2*TYP2*TYP2
+               TYP1 = VIN(I,J) - 2.0_SP*VIN(I,J+1) + VIN(I,J+2)
+               TYP2 = 3.0_SP*VIN(I,J) - 4.0_SP*VIN(I,J+1) + VIN(I,J+2)
+               WBETA2 = BETACOEF1*TYP1*TYP1 + BETACOEF2*TYP2*TYP2
 
-		   W0BAR = R0_R/( (WNEPS + WBETA0)*(WNEPS + WBETA0) )
-		   W1BAR = R1_R/( (WNEPS + WBETA1)*(WNEPS + WBETA1) )
-		   W2BAR = R2_R/( (WNEPS + WBETA2)*(WNEPS + WBETA2) )
+               W0BAR = R0_R/( (WNEPS + WBETA0)*(WNEPS + WBETA0) )
+               W1BAR = R1_R/( (WNEPS + WBETA1)*(WNEPS + WBETA1) )
+               W2BAR = R2_R/( (WNEPS + WBETA2)*(WNEPS + WBETA2) )
 
-		   TYP3 = W0BAR + W1BAR + W2BAR
-		   WNW0 = W0BAR/TYP3
-		   WNW1 = W1BAR/TYP3
-		   WNW2 = W2BAR/TYP3
+               TYP3 = W0BAR + W1BAR + W2BAR
+               WNW0 = W0BAR/TYP3
+               WNW1 = W1BAR/TYP3
+               WNW2 = W2BAR/TYP3
 
-		   WNP0 = -(1.0_SP/6.0_SP)*VIN(I,J-2) + (5.0_SP/6.0_SP)*VIN(I,J-1) + (1.0_SP/3.0_SP)*VIN(I,J)
-		   WNP1 = (1.0_SP/3.0_SP)*VIN(I,J-1) + (5.0_SP/6.0_SP)*VIN(I,J) - (1.0_SP/6.0_SP)*VIN(I,J+1)
-		   WNP2 = (11.0_SP/6.0_SP)*VIN(I,J) - (7.0_SP/6.0_SP)*VIN(I,J+1) + (1.0_SP/3.0_SP)*VIN(I,J+2)
+               WNP0 = -(1.0_SP/6.0_SP)*VIN(I,J-2) + (5.0_SP/6.0_SP)*VIN(I,J-1) + (1.0_SP/3.0_SP)*VIN(I,J)
+               WNP1 = (1.0_SP/3.0_SP)*VIN(I,J-1) + (5.0_SP/6.0_SP)*VIN(I,J) - (1.0_SP/6.0_SP)*VIN(I,J+1)
+               WNP2 = (11.0_SP/6.0_SP)*VIN(I,J) - (7.0_SP/6.0_SP)*VIN(I,J+1) + (1.0_SP/3.0_SP)*VIN(I,J+2)
 
-		   OutR(I,J) = WNW0*WNP0 + WNW1*WNP1 + WNW2*WNP2
-		   !================================================
+               OutR(I,J) = WNW0*WNP0 + WNW1*WNP1 + WNW2*WNP2
+               !================================================
 
-		   TYP1 = VIN(I,J-3) - 2.0_SP*VIN(I,J-2) + VIN(I,J-1)
-		   TYP2 = VIN(I,J-3) - 4.0_SP*VIN(I,J-2) + 3.0_SP*VIN(I,J-1)
-		   WBETA0 = BETACOEF1*TYP1*TYP1 + BETACOEF2*TYP2*TYP2
+               TYP1 = VIN(I,J-3) - 2.0_SP*VIN(I,J-2) + VIN(I,J-1)
+               TYP2 = VIN(I,J-3) - 4.0_SP*VIN(I,J-2) + 3.0_SP*VIN(I,J-1)
+               WBETA0 = BETACOEF1*TYP1*TYP1 + BETACOEF2*TYP2*TYP2
 
-		   TYP1 = VIN(I,J-2) - 2.0_SP*VIN(I,J-1) + VIN(I,J)
-		   TYP2 = VIN(I,J-2) - VIN(I,J)
-		   WBETA1 = BETACOEF1*TYP1*TYP1 + BETACOEF2*TYP2*TYP2
+               TYP1 = VIN(I,J-2) - 2.0_SP*VIN(I,J-1) + VIN(I,J)
+               TYP2 = VIN(I,J-2) - VIN(I,J)
+               WBETA1 = BETACOEF1*TYP1*TYP1 + BETACOEF2*TYP2*TYP2
 
-		   TYP1 = VIN(I,J-1) - 2.0_SP*VIN(I,J) + VIN(I,J+1)
-		   TYP2 = 3.0_SP*VIN(I,J-1) - 4.0_SP*VIN(I,J) + VIN(I,J+1)
-		   WBETA2 = BETACOEF1*TYP1*TYP1 + BETACOEF2*TYP2*TYP2
+               TYP1 = VIN(I,J-1) - 2.0_SP*VIN(I,J) + VIN(I,J+1)
+               TYP2 = 3.0_SP*VIN(I,J-1) - 4.0_SP*VIN(I,J) + VIN(I,J+1)
+               WBETA2 = BETACOEF1*TYP1*TYP1 + BETACOEF2*TYP2*TYP2
 
-		   W0BAR = R0_L/( (WNEPS + WBETA0)*(WNEPS + WBETA0) )
-		   W1BAR = R1_L/( (WNEPS + WBETA1)*(WNEPS + WBETA1) )
-		   W2BAR = R2_L/( (WNEPS + WBETA2)*(WNEPS + WBETA2) )
+               W0BAR = R0_L/( (WNEPS + WBETA0)*(WNEPS + WBETA0) )
+               W1BAR = R1_L/( (WNEPS + WBETA1)*(WNEPS + WBETA1) )
+               W2BAR = R2_L/( (WNEPS + WBETA2)*(WNEPS + WBETA2) )
 
-		   TYP3 = W0BAR + W1BAR + W2BAR
-		   WNW0 = W0BAR/TYP3
-		   WNW1 = W1BAR/TYP3
-		   WNW2 = W2BAR/TYP3
+               TYP3 = W0BAR + W1BAR + W2BAR
+               WNW0 = W0BAR/TYP3
+               WNW1 = W1BAR/TYP3
+               WNW2 = W2BAR/TYP3
 
-		   WNP0 = (1.0_SP/3.0_SP)*VIN(I,J-3) - (7.0_SP/6.0_SP)*VIN(I,J-2) + (11.0_SP/6.0_SP)*VIN(I,J-1)
-		   WNP1 = -(1.0_SP/6.0_SP)*VIN(I,J-2) + (5.0_SP/6.0_SP)*VIN(I,J-1) + (1.0_SP/3.0_SP)*VIN(I,J)
-		   WNP2 = (1.0_SP/3.0_SP)*VIN(I,J-1) + (5.0_SP/6.0_SP)*VIN(I,J) - (1.0_SP/6.0_SP)*VIN(I,J+1)
+               WNP0 = (1.0_SP/3.0_SP)*VIN(I,J-3) - (7.0_SP/6.0_SP)*VIN(I,J-2) + (11.0_SP/6.0_SP)*VIN(I,J-1)
+               WNP1 = -(1.0_SP/6.0_SP)*VIN(I,J-2) + (5.0_SP/6.0_SP)*VIN(I,J-1) + (1.0_SP/3.0_SP)*VIN(I,J)
+               WNP2 = (1.0_SP/3.0_SP)*VIN(I,J-1) + (5.0_SP/6.0_SP)*VIN(I,J) - (1.0_SP/6.0_SP)*VIN(I,J+1)
 
-		   OutL(I,J) = WNW0*WNP0 + WNW1*WNP1 + WNW2*WNP2
+               OutL(I,J) = WNW0*WNP0 + WNW1*WNP1 + WNW2*WNP2
 
-		ENDDO
+            ENDDO
      ENDDO
 
 ENDSUBROUTINE WENO_CONSTRUCT_Y

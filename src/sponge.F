@@ -49,6 +49,8 @@
 !    HISTORY: 10/27/2010 Fengyan Shi
 !
 !-------------------------------------------------------------------------------------
+#define nop(x) associate( x => x ); end associate
+
 SUBROUTINE SPONGE_DAMPING
      USE GLOBAL
      IMPLICIT NONE
@@ -75,16 +77,15 @@ END SUBROUTINE SPONGE_DAMPING
 !
 !-------------------------------------------------------------------------------------
 SUBROUTINE ABSORBING_GENERATING_BC
-     USE GLOBAL, ONLY : ETA,U,V,SPONGEMAKER,Mloc,Nloc,MASK,I,J,DX,DY,ZERO
-     USE GLOBAL, ONLY : SP,PI,Grav,TIME,NumFreq,Phase_Ser,&
-                       Ibeg,Iend,Jbeg,Jend,&
-                       Segma_Ser,Stokes_Drift_Ser,Cm_eta,Sm_eta,&
-                       Cm_u,Sm_u,Cm_v,Sm_v,SPONGE,tmp4preview, &
+     USE GLOBAL, ONLY : ETA,U,V,SPONGEMAKER,Mloc,Nloc,I,J,ZERO
+     USE GLOBAL, ONLY : SP,PI,TIME,NumFreq,Phase_Ser,&
+                       Segma_Ser,Cm_eta,Sm_eta,&
+                       Cm_u,Sm_u,Cm_v,Sm_v,tmp4preview, &
                        HU, HV,Depth
 
      IMPLICIT NONE
-     INTEGER :: KK,K
-     real(SP),DIMENSION(Mloc,Nloc) :: Ein2D,Din2D
+     INTEGER :: KK
+     real(SP),DIMENSION(Mloc,Nloc) :: Ein2D
      real(SP),DIMENSION(Mloc,Nloc) :: Uin2D,Vin2D
      
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!START!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -150,9 +151,7 @@ SUBROUTINE CALCULATE_SPONGE_MAKER(M,N,Nghost,DX,DY,&
                             R_sponge,A_sponge,SPONGE)
      USE PARAM
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : n_west, n_east, n_suth, n_nrth,&
-                 px,py,npx,npy,Mglob,Nglob, &
-	           iista   !ykchoi Jan/23/2018
+     USE GLOBAL, ONLY : iista   !ykchoi Jan/23/2018
 # endif
      IMPLICIT NONE
      INTEGER, INTENT(IN)::M,N,Nghost
@@ -167,6 +166,8 @@ SUBROUTINE CALCULATE_SPONGE_MAKER(M,N,Nghost,DX,DY,&
      REAL(SP),DIMENSION(M,N),INTENT(INOUT)::SPONGE
      REAL(SP)::ri,lim
      INTEGER::Iwidth
+     nop(DX)
+     nop(DY)
 
 
 # if defined (CARTESIAN)
@@ -184,7 +185,7 @@ SUBROUTINE CALCULATE_SPONGE_MAKER(M,N,Nghost,DX,DY,&
 # if defined(PARALLEL)
 ![---ykchoi Jan/23/2018
 !       ri = R_Sponge**(50*(i+npx*Mglob/px-1)/(Iwidth-1))
-	ri = R_Sponge**(50*(i + (iista - 1) -1)/(Iwidth-1))
+       ri = R_Sponge**(50*(i + (iista - 1) -1)/(Iwidth-1))
 !---ykchoi Jan/23/2018]
 # else
        ri=R_sponge**(50*(I-1)/(Iwidth-1))
@@ -208,12 +209,11 @@ SUBROUTINE CALCULATE_FRICTION_SPONGE(M,N,Nghost,DX,DY,&
                             Sponge_south_width,Sponge_north_width, &
                             R_sponge,A_sponge,SPONGE)
      USE PARAM
-     USE GLOBAL, ONLY : depth,MinDepthFrc,CDsponge
+     USE GLOBAL, ONLY : CDsponge
                         
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : n_west, n_east, n_suth, n_nrth,px,py,npx,npy,&
-                        Mglob,Nglob, &
-	                  iista, iiend, jjsta, jjend    !ykchoi Jan/23/2018
+     USE GLOBAL, ONLY : px,py,npx,npy,&
+                        iista, iiend, jjsta, jjend    !ykchoi Jan/23/2018
 # endif
      IMPLICIT NONE
      INTEGER, INTENT(IN)::M,N,Nghost
@@ -229,8 +229,10 @@ SUBROUTINE CALCULATE_FRICTION_SPONGE(M,N,Nghost,DX,DY,&
      REAL(SP),DIMENSION(M,N),INTENT(OUT)::SPONGE
      REAL(SP)::ri,lim
      INTEGER::Iwidth
-     REAL(SP) :: DXg,DYg,xx
+     REAL(SP) :: DXg,DYg
      REAL(SP),DIMENSION(M,N) :: tmp_2d_1,tmp_2d_2
+     nop(A_sponge)
+     nop(R_sponge)
 
 
 ! note that I used SPONGE represent CD from input, do not mess up 
@@ -390,12 +392,11 @@ SUBROUTINE CALCULATE_DIFFUSION_SPONGE(M,N,Nghost,DX,DY,&
                             Sponge_south_width,Sponge_north_width, &
                             R_sponge,A_sponge,SPONGE)
      USE PARAM
-     USE GLOBAL, ONLY : depth,MinDepthFrc,Csp
+     USE GLOBAL, ONLY : Csp
                         
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : n_west, n_east, n_suth, n_nrth,px,py,npx,npy,&
-                        Mglob,Nglob, &
-	                  iista, iiend, jjsta, jjend    !ykchoi Jan/23/2018
+     USE GLOBAL, ONLY : px,py,npx,npy,&
+                        iista, iiend, jjsta, jjend    !ykchoi Jan/23/2018
 # endif
      IMPLICIT NONE
      INTEGER, INTENT(IN)::M,N,Nghost
@@ -411,8 +412,10 @@ SUBROUTINE CALCULATE_DIFFUSION_SPONGE(M,N,Nghost,DX,DY,&
      REAL(SP),DIMENSION(M,N),INTENT(INOUT)::SPONGE
      REAL(SP)::ri,lim
      INTEGER::Iwidth
-     REAL(SP) :: DXg,DYg,xx
+     REAL(SP) :: DXg,DYg
      REAL(SP),DIMENSION(M,N) :: tmp_2d_1,tmp_2d_2
+     nop(A_sponge)
+     nop(R_sponge)
 
 
      tmp_2d_2 = ZERO
@@ -577,11 +580,9 @@ SUBROUTINE CALCULATE_SPONGE(M,N,Nghost,DX,DY,&
                             R_sponge,A_sponge,SPONGE)
 
      USE PARAM
-     USE GLOBAL, ONLY : depth,MinDepthFrc
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : n_west, n_east, n_suth, n_nrth,px,py,npx,npy,&
-                        Mglob,Nglob, &
-	                  iista, iiend, jjsta, jjend    !ykchoi Jan/23/2018
+     USE GLOBAL, ONLY : px,py,npx,npy,&
+                        iista, iiend, jjsta, jjend    !ykchoi Jan/23/2018
 # endif
      IMPLICIT NONE
      INTEGER, INTENT(IN)::M,N,Nghost
@@ -598,7 +599,7 @@ SUBROUTINE CALCULATE_SPONGE(M,N,Nghost,DX,DY,&
      REAL(SP),DIMENSION(M,N),INTENT(INOUT)::SPONGE
      REAL(SP)::ri,lim
      INTEGER::Iwidth
-     REAL(SP) :: DXg,DYg,xx
+     REAL(SP) :: DXg,DYg
      REAL(SP),DIMENSION(M,N) :: tmp_2d_1,tmp_2d_2 
 
      tmp_2d_2 = ZERO
@@ -729,9 +730,9 @@ SUBROUTINE CALCULATE_SPONGE(M,N,Nghost,DX,DY,&
        ri = R_Sponge**(50*(N-J+(py-npy-1)*(jjend - jjsta + 1) )/(Iwidth-1))
 !---ykchoi Jan/23/2018]
 # else
-       ri=R_sponge**(50*(N-J)/(Iwidth-1))	  
+       ri=R_sponge**(50*(N-J)/(Iwidth-1))
 # endif
-       tmp_2d_2(i,j)=MAX(A_Sponge**ri,lim)	  
+       tmp_2d_2(i,j)=MAX(A_Sponge**ri,lim)
      ENDDO
      ENDDO
      ENDIF
@@ -743,7 +744,7 @@ SUBROUTINE CALCULATE_SPONGE(M,N,Nghost,DX,DY,&
         ELSE
           Sponge(I,J)=tmp_2d_2(I,J)
         ENDIF
-        IF(Sponge(I,J)<A_Sponge**(R_Sponge**50))Sponge(I,J)=1.0_SP	  
+        IF(Sponge(I,J)<A_Sponge**(R_Sponge**50))Sponge(I,J)=1.0_SP
       ENDDO
       ENDDO
 
@@ -760,29 +761,29 @@ END SUBROUTINE CALCULATE_SPONGE
 !-------------------------------------------------------------------------------------
 SUBROUTINE CALCULATE_CD_BREAKWATER
      USE PARAM
-     USE GLOBAL, ONLY : depth,MinDepthFrc,CD_breakwater,BreakWaterWidth, &
-                        Mglob,Nglob,Ibeg,Iend,Jbeg,Jend,Nghost,DX,DY,&
-                        Mloc,Nloc,BreakWaterAbsorbCoef
+     USE GLOBAL, ONLY : CD_breakwater,BreakWaterWidth, &
+                        Mglob,Nglob,Nghost,DX,DY,&
+                        BreakWaterAbsorbCoef
 # if defined (PARALLEL)
-     USE GLOBAL, ONLY : px,py,npx,npy,myid,ier,NumberProcessor, &
+     USE GLOBAL, ONLY : Mloc,Nloc,px,py,myid,ier,NumberProcessor, &
                         iista, iiend, jjsta, jjend    !ykchoi (28/Jan/2018)   
 # endif                 
      IMPLICIT NONE
 # if defined (PARALLEL)
 ![-------ykchoi (28/Jan/2018)      
-	!INTEGER,DIMENSION(NumberProcessor) :: npxs,npys
+      !INTEGER,DIMENSION(NumberProcessor) :: npxs,npys
       !REAL(SP),DIMENSION(NumberProcessor) :: xx
       !INTEGER :: l
-	INTEGER :: Nista, Niend, Njsta, Njend
-	INTEGER, ALLOCATABLE :: Nistas(:), Niends(:), Njstas(:), Njends(:)
-	INTEGER :: irank, lenx, leny, lenxy, ireq
-	INTEGER :: istanum, iendnum, jstanum, jendnum
-	INTEGER :: istatus(mpi_status_size)
-	REAL(SP), ALLOCATABLE :: xx(:,:)
+      INTEGER :: Nista, Niend, Njsta, Njend
+      INTEGER, ALLOCATABLE :: Nistas(:), Niends(:), Njstas(:), Njends(:)
+      INTEGER :: irank, lenx, leny, lenxy, ireq
+      INTEGER :: istanum, iendnum, jstanum, jendnum
+      INTEGER :: istatus(mpi_status_size)
+      REAL(SP), ALLOCATABLE :: xx(:,:)
 !-------ykchoi (28/Jan/2018)]
 # endif
 
-     REAL(SP)::ri,lim
+     REAL(SP)::ri
      INTEGER::Iwidth,Jwidth,Ib,Jb
      REAL(SP) :: DXg,DYg,tmp_2d
      REAL(SP),DIMENSION(:,:),ALLOCATABLE :: tmp_glob
@@ -875,11 +876,11 @@ SUBROUTINE CALCULATE_CD_BREAKWATER
                       0, MPI_COMM_WORLD, ier )
 
      if( myid == 0 )then
-	     CD_breakwater = tmp_glob( 1:Mloc, 1:Nloc )
+           CD_breakwater = tmp_glob( 1:Mloc, 1:Nloc )
      endif          
 
      do irank=1, px*py-1
-     	  if( myid == 0 ) then
+          if( myid == 0 ) then
           istanum = Nistas(irank+1) - Nghost
           iendnum = Niends(irank+1) + Nghost
           jstanum = Njstas(irank+1) - Nghost
@@ -895,8 +896,8 @@ SUBROUTINE CALCULATE_CD_BREAKWATER
           call mpi_wait( ireq, istatus, ier )
           deallocate( xx )
           
-	  elseif( myid == irank ) then
-	    
+        elseif( myid == irank ) then
+
           lenx = Niend-Nista+1+2*Nghost
           leny = Njend-Njsta+1+2*Nghost
           lenxy = lenx*leny
@@ -904,7 +905,7 @@ SUBROUTINE CALCULATE_CD_BREAKWATER
           call mpi_irecv( CD_breakwater, lenxy, mpi_sp, 0, 1, mpi_comm_world, ireq, ier )
           call mpi_wait( ireq, istatus, ier )
           
-	  endif
+        endif
      enddo
 
      deallocate( Nistas, Niends, Njstas, Njends )

@@ -78,7 +78,7 @@ MODULE GLOBAL
        INTEGER :: StationOutputBuffer
 
 ! timer
-       REAL(SP) :: tbegin,tend
+       REAL(8) :: tbegin,tend
        INTEGER :: ISTAGE
 
 # if defined(FILTERING)
@@ -182,14 +182,14 @@ MODULE GLOBAL
        REAL(SP),DIMENSION(:,:),ALLOCATABLE :: &
 # if defined (CARTESIAN)
           U4xL,U4xR,V4yL,V4yR, &
-		V4xL,V4xR,U4yL,U4yR, &   !ykchoi (15.08.06.)
+          V4xL,V4xR,U4yL,U4yR, &   !ykchoi (15.08.06.)
           U4,V4,U1p,V1p, &
           U1pp,V1pp, &
           U2,V2,U3,V3, &
 # else
 # if defined(ZALPHA)
           U4xL,U4xR,V4yL,V4yR, &
-		V4xL,V4xR,U4yL,U4yR, &   !ykchoi (15.08.06.)
+          V4xL,V4xR,U4yL,U4yR, &   !ykchoi (15.08.06.)
           U4,V4,&
 # endif
           Dx,Dy, Coriolis,Lat_theta, &
@@ -293,7 +293,7 @@ MODULE GLOBAL
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: Num_Zero_Up
 
       !ykchoi
-	REAL(SP),DIMENSION(:,:),ALLOCATABLE :: ETA2sum,ETA2mean,SigWaveHeight
+      REAL(SP),DIMENSION(:,:),ALLOCATABLE :: ETA2sum,ETA2mean,SigWaveHeight
 
 ! depth H=Eta+Depth, 
        REAL(SP),DIMENSION(:,:),ALLOCATABLE :: Depth,H,&
@@ -359,8 +359,8 @@ MODULE GLOBAL
        LOGICAL :: OUT_Umean=.FALSE.,OUT_Vmean=.FALSE.,&
                   OUT_ETAmean=.FALSE.,&
                   OUT_WaveHeight = .FALSE.,&
-	          OUT_WaveHeightSig = .FALSE.    !ykchoi
-	 
+                  OUT_WaveHeightSig = .FALSE.    !ykchoi
+
 
 
 !# if defined (CARTESIAN)
@@ -413,13 +413,13 @@ MODULE GLOBAL
        REAL(SP) :: WAVEMAKER_Cbrk
        LOGICAL :: ETA_LIMITER = .FALSE.
        REAL(SP) :: CrestLimit, TroughLimit
-	!ykchoi 
-	 REAL(SP) :: EtaBlowVal
-	 REAL(SP) :: STEADY_TIME
-      ! ykchoi(08.18.2015) :: for viscosity of wavemaker
+       !ykchoi 
+       REAL(SP) :: EtaBlowVal
+       REAL(SP) :: STEADY_TIME
+       !ykchoi(08.18.2015) :: for viscosity of wavemaker
        REAL(SP) :: visbrk, WAVEMAKER_visbrk
        LOGICAL :: WAVEMAKER_VIS=.FALSE.
-!	 REAL(SP) :: PLOT_SMALLINTV
+!      REAL(SP) :: PLOT_SMALLINTV
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!START!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

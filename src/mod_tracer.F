@@ -421,7 +421,6 @@ SUBROUTINE BROADCAST_XY
      INTEGER,DIMENSION(NumberProcessor) :: npxs,npys
      REAL(SP),DIMENSION(NumberProcessor) :: xx
      LOGICAL,DIMENSION(NumberProcessor) :: yy
-       INTEGER :: IDsend
        REAL(SP),DIMENSION(NumTracker,NumberProcessor) :: X_TRACK_ALL,Y_TRACK_ALL
        LOGICAL,DIMENSION(NumTracker,NumberProcessor) :: IN_CELL_ALL
 
