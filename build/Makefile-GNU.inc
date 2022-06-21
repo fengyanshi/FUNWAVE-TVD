@@ -12,11 +12,11 @@ endif
 
 ifdef SEQU
   FC=gfortran
-  FFLAGS=-nocpp -fmax-stack-var-size=80000 -fimplicit-none -fPIC
+  FFLAGS=-nocpp -fimplicit-none -fPIC
   LFLAGS=
 else
   FC = mpif90
-  FFLAGS=-nocpp -fmax-stack-var-size=80000 -fimplicit-none -fPIC
+  FFLAGS=-nocpp -fimplicit-none -fPIC
   LFLAGS=
 endif
 
