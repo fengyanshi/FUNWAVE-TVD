@@ -69,7 +69,7 @@ SUBROUTINE SourceTerms
      LOGICAL :: PQ_scheme = .FALSE.
      REAL(SP) :: xmk,ymk
 # endif     
-     INTEGER :: kf
+     INTEGER :: I,J,kf
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!START!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     REAL(SP) :: AA                                       ! Salatin et al. 2021

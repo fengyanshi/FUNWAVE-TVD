@@ -59,7 +59,7 @@ SUBROUTINE SOLITARY_WAVE_LEFT_BOUNDARY
      USE GLOBAL
      IMPLICIT NONE
      REAL(SP):: aa,h00,c1,tex,tlag,zz
-     INTEGER::Iwavemaker
+     INTEGER::J,Iwavemaker
 
 # if defined (PARALLEL)
        if ( n_west .eq. MPI_PROC_NULL ) then
@@ -98,8 +98,8 @@ SUBROUTINE INITIAL_WAVE
      USE GLOBAL
      IMPLICIT NONE
      REAL(SP),Dimension(Mloc,Nloc)::XX,YY
-     REAL(SP):: sigma,x_c,y_c,a
-     INTEGER :: ii1,ii2
+     REAL(SP):: sigma,x_c,y_c,a,tmp1,tmp2
+     INTEGER :: i,j,ii1,ii2
 
 ! the initial wave domain includes ghost cells
 
@@ -274,6 +274,7 @@ SUBROUTINE INITIAL_GAUSIAN(M,N,Nghost,Dphi,Dtheta,Lon_West,Lat_South, &
 # endif
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Eta
      REAL(SP) :: r,xr,yr
+     INTEGER :: I,J
      
      Eta = ZERO
 # if defined (PARALLEL)
@@ -361,6 +362,7 @@ SUBROUTINE INITIAL_DIPOLE(M,N,Nghost,Dphi,Dtheta,Lon_West,Lat_South, &
 # endif
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Eta
      REAL(SP) :: r,xr,yr,uni
+     INTEGER :: I,J
      
      Eta = ZERO
 # if defined (PARALLEL)
@@ -448,8 +450,11 @@ SUBROUTINE INITIAL_N_WAVE(M,N,DX,x1,x2,Ha,gamma_s,dep,U,V,Eta)
      REAL(SP),DIMENSION(M,N),INTENT(IN) :: DX
 # endif
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: U,V,Eta
+     INTEGER :: I,J
+     REAL(SP) :: tmp1
      nop(gamma_s)
      nop(x2)
+
      IF(dep==ZERO)THEN
       WRITE(*,*)'depth for Nwave should not be 0, stop!'
       STOP
@@ -524,6 +529,7 @@ SUBROUTINE INITIAL_SOLITARY_WAVE(M,N,DX,Xwavemaker,&
      REAL(SP),INTENT(IN) :: AMP_Soli
      REAL(SP) :: A,B,A1,A2,alpha,SC,Cph,C_ph
      LOGICAL,INTENT(IN) :: SolitaryPositiveDirection
+     INTEGER :: I,J
      nop(Beta)
 
 !     alpha=0.5_SP*Beta*Beta+Beta

@@ -60,7 +60,7 @@ SUBROUTINE phi_exch (PHI)
 
     INTEGER,DIMENSION(MPI_STATUS_SIZE,4) :: status
     INTEGER,DIMENSION(4) :: req
-    INTEGER :: nreq,len
+    INTEGER :: i,j,nreq,len
     REAL(SP),DIMENSION(Mloc,Nghost) :: rNmsg, sNmsg,rSmsg,sSmsg
     REAL(SP),DIMENSION(Nloc,Nghost) :: rWmsg, sWmsg,rEmsg,sEmsg
 
@@ -190,7 +190,7 @@ SUBROUTINE phi_exch_variable_length (PHI,Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost)
 
     INTEGER,DIMENSION(MPI_STATUS_SIZE,4) :: status
     INTEGER,DIMENSION(4) :: req
-    INTEGER :: nreq,len
+    INTEGER :: i,j,nreq,len
     REAL(SP),DIMENSION(Mloc,Nghost) :: rNmsg, sNmsg,rSmsg,sSmsg
     REAL(SP),DIMENSION(Nloc,Nghost) :: rWmsg, sWmsg,rEmsg,sEmsg
 
@@ -319,7 +319,7 @@ SUBROUTINE phi_int_exch (PHI)
 
     INTEGER,DIMENSION(MPI_STATUS_SIZE,4) :: status
     INTEGER,DIMENSION(4) :: req
-    INTEGER :: nreq,len
+    INTEGER :: i,j,nreq,len
     INTEGER,DIMENSION(Mloc,Nghost) :: rNmsg, sNmsg,rSmsg,sSmsg
     INTEGER,DIMENSION(Nloc,Nghost) :: rWmsg, sWmsg,rEmsg,sEmsg
 
@@ -460,6 +460,7 @@ SUBROUTINE DISTRIBUTE_VarGlob(VarGlob,PHI)
      INTEGER :: istatus(mpi_status_size)
      REAL(SP), ALLOCATABLE :: xx(:,:)
 ! -------ykchoi (08/May/2017) ]
+     INTEGER :: i,j
 
 ! TEMP
 

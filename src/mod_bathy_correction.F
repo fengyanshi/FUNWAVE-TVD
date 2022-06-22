@@ -75,13 +75,13 @@ MODULE BATHY_CORRECTION_MODULE
 CONTAINS
 
 SUBROUTINE CORRECTION
-  USE GLOBAL,ONLY : LARGE,tmp1,MinDepthFrc
+  USE GLOBAL,ONLY : LARGE,MinDepthFrc
 
   USE INPUT_READ
   IMPLICIT NONE
   CHARACTER(LEN=80)::FILE_NAME=' '
-  INTEGER :: ierr,pointcount
-  REAL(SP) :: change_percentage, threshold
+  INTEGER :: I,J,ierr,pointcount
+  REAL(SP) :: tmp1, change_percentage, threshold
 
      pointcount=0
      threshold = 0.05_SP

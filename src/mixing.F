@@ -108,6 +108,7 @@ END SUBROUTINE MIXING_STUFF
 
       !ykchoi
       REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: ETA2sum,ETA2mean,SigWaveHeight
+      INTEGER :: I,J
       nop(Ibeg)
       nop(Iend)
       nop(Jbeg)

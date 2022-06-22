@@ -54,6 +54,7 @@
 SUBROUTINE SPONGE_DAMPING
      USE GLOBAL
      IMPLICIT NONE
+     INTEGER :: I,J
 
      DO J=1,Nloc
      DO I=1,Mloc
@@ -77,14 +78,14 @@ END SUBROUTINE SPONGE_DAMPING
 !
 !-------------------------------------------------------------------------------------
 SUBROUTINE ABSORBING_GENERATING_BC
-     USE GLOBAL, ONLY : ETA,U,V,SPONGEMAKER,Mloc,Nloc,I,J,ZERO
+     USE GLOBAL, ONLY : ETA,U,V,SPONGEMAKER,Mloc,Nloc,ZERO
      USE GLOBAL, ONLY : SP,PI,TIME,NumFreq,Phase_Ser,&
                        Segma_Ser,Cm_eta,Sm_eta,&
                        Cm_u,Sm_u,Cm_v,Sm_v,tmp4preview, &
                        HU, HV,Depth
 
      IMPLICIT NONE
-     INTEGER :: KK
+     INTEGER :: I,J,KK
      real(SP),DIMENSION(Mloc,Nloc) :: Ein2D
      real(SP),DIMENSION(Mloc,Nloc) :: Uin2D,Vin2D
      
@@ -165,7 +166,7 @@ SUBROUTINE CALCULATE_SPONGE_MAKER(M,N,Nghost,DX,DY,&
                           R_sponge,A_sponge
      REAL(SP),DIMENSION(M,N),INTENT(INOUT)::SPONGE
      REAL(SP)::ri,lim
-     INTEGER::Iwidth
+     INTEGER::I,J,Iwidth
      nop(DX)
      nop(DY)
 
@@ -228,7 +229,7 @@ SUBROUTINE CALCULATE_FRICTION_SPONGE(M,N,Nghost,DX,DY,&
                           R_sponge,A_sponge
      REAL(SP),DIMENSION(M,N),INTENT(OUT)::SPONGE
      REAL(SP)::ri,lim
-     INTEGER::Iwidth
+     INTEGER::I,J,Iwidth
      REAL(SP) :: DXg,DYg
      REAL(SP),DIMENSION(M,N) :: tmp_2d_1,tmp_2d_2
      nop(A_sponge)
@@ -411,7 +412,7 @@ SUBROUTINE CALCULATE_DIFFUSION_SPONGE(M,N,Nghost,DX,DY,&
                           R_sponge,A_sponge
      REAL(SP),DIMENSION(M,N),INTENT(INOUT)::SPONGE
      REAL(SP)::ri,lim
-     INTEGER::Iwidth
+     INTEGER::I,J,Iwidth
      REAL(SP) :: DXg,DYg
      REAL(SP),DIMENSION(M,N) :: tmp_2d_1,tmp_2d_2
      nop(A_sponge)
@@ -598,7 +599,7 @@ SUBROUTINE CALCULATE_SPONGE(M,N,Nghost,DX,DY,&
 
      REAL(SP),DIMENSION(M,N),INTENT(INOUT)::SPONGE
      REAL(SP)::ri,lim
-     INTEGER::Iwidth
+     INTEGER::I,J,Iwidth
      REAL(SP) :: DXg,DYg
      REAL(SP),DIMENSION(M,N) :: tmp_2d_1,tmp_2d_2 
 
@@ -784,7 +785,7 @@ SUBROUTINE CALCULATE_CD_BREAKWATER
 # endif
 
      REAL(SP)::ri
-     INTEGER::Iwidth,Jwidth,Ib,Jb
+     INTEGER::I,J,Iwidth,Jwidth,Ib,Jb
      REAL(SP) :: DXg,DYg,tmp_2d
      REAL(SP),DIMENSION(:,:),ALLOCATABLE :: tmp_glob
  

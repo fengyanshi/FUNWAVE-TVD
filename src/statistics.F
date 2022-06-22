@@ -58,7 +58,7 @@ SUBROUTINE STATISTICS
 # if defined (PARALLEL)
      REAL(SP)::myvar
 # endif
-!
+     INTEGER :: I,J
 
 
      MassVolume=ZERO

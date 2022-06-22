@@ -56,6 +56,7 @@ SUBROUTINE BOUNDARY_CONDITION
      USE GLOBAL
      IMPLICIT NONE
      REAL(SP)::Xi,Deps
+     INTEGER :: I,J
 
 
 ! four sides of computational domain
@@ -431,6 +432,9 @@ SUBROUTINE EXCHANGE
     INTEGER :: VTYPE
 # if defined (CARTESIAN)
     REAL(SP),DIMENSION(Mloc,Nloc) :: rMASK
+#   if defined (FILTERING)
+      INTEGER :: I,J
+#   endif
 # endif
 
 # if defined (CARTESIAN)
@@ -537,6 +541,7 @@ SUBROUTINE PHI_COLL_VARIABLE_LENGTH(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,PHI,VTY
     INTEGER,INTENT(IN) :: VTYPE
     INTEGER,INTENT(IN) :: Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost
     REAL(SP),INTENT(INOUT) :: PHI(Mloc,Nloc)
+    INTEGER :: I,J,K
     nop(VTYPE)
 
       ! x-direction
@@ -652,6 +657,7 @@ SUBROUTINE PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,PHI,VTYPE)
     REAL(SP),DIMENSION(Mloc,Nghost) :: xx,send2d
 # endif
 # endif
+    INTEGER I,J,K
 
 ! periodic first because it is not related to VTYPE
 # if defined (CARTESIAN)

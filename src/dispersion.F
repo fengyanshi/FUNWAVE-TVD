@@ -73,6 +73,7 @@ SUBROUTINE CAL_DISPERSION
      REAL(SP) :: omega_0,omega_1
      REAL(SP),Dimension(Mloc,Nloc) :: omega            
 # endif
+     INTEGER :: I,J
     
 ! uxx
     CALL DERIVATIVE_XX(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,MASK9,DX,U,Uxx)

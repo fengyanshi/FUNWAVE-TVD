@@ -79,6 +79,7 @@ SUBROUTINE PutFileASCII(FILE,PHI)
      REAL(SP),DIMENSION( MGlob, NGlob ) :: PHIGLOB
 !-------ykchoi (06/May/2017)]
      LOGICAL :: FirstCallPutFile = .TRUE.
+     INTEGER :: I,J
      SAVE  FirstCallPutFile
      
 ! first time call 

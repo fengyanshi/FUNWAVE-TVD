@@ -79,6 +79,7 @@
     REAL(SP), dimension(Mloc,Nloc) :: a, c, d, f
     REAL(SP), dimension(Mloc,Nloc) :: c1, y1, y2
     REAL(SP), dimension(Mloc) :: beta, a_beg,c_end
+    INTEGER :: I,J
 
 !
 !  off diagonal corner values are stored in a(i,Jbeg) and c(i, Jend)
@@ -417,6 +418,7 @@ SUBROUTINE TRIDx ( a, c, d, f)
         REAL(SP), dimension(Mloc,Nloc) :: a, c, d, f
         REAL(SP), dimension(Nloc,2) :: rmsg, smsg
         integer status(MPI_STATUS_SIZE), req
+        integer :: i,j
         
 ! forward sweep
 
@@ -506,7 +508,7 @@ SUBROUTINE TRIDy ( a, c, d, f)
         REAL(SP), dimension(Mloc,Nloc) :: a, c, d, f
         REAL(SP), dimension(Mloc,2) :: rmsg, smsg
         integer status(MPI_STATUS_SIZE), req
-!        integer i, j
+        integer :: i, j
         
 ! forward sweep
 

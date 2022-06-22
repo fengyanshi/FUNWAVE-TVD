@@ -61,6 +61,7 @@ SUBROUTINE DERIVATIVE_Y_High(M,N,Ibeg,Iend,Jbeg,Jend,MASK,DY,Uin,Uout)
 # endif
      INTEGER,DIMENSION(M,N),INTENT(IN) :: MASK
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Uout
+     INTEGER :: I,J
 
      DO J=Jbeg,Jend
      DO I=Ibeg,Iend
@@ -97,6 +98,7 @@ SUBROUTINE DERIVATIVE_X_High(M,N,Ibeg,Iend,Jbeg,Jend,MASK,DX,Uin,Uout)
 # endif
      INTEGER,DIMENSION(M,N),INTENT(IN) :: MASK
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Uout
+     INTEGER :: I,J
 
      DO J=Jbeg,Jend
      DO I=Ibeg,Iend
@@ -132,6 +134,7 @@ SUBROUTINE DERIVATIVE_Y(M,N,Ibeg,Iend,Jbeg,Jend,MASK,DY,Uin,Uout)
 # endif
      INTEGER,DIMENSION(M,N),INTENT(IN) :: MASK
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Uout
+     INTEGER :: I,J
 
      DO J=Jbeg,Jend
      DO I=Ibeg,Iend
@@ -167,6 +170,7 @@ SUBROUTINE DERIVATIVE_X(M,N,Ibeg,Iend,Jbeg,Jend,MASK,DX,Uin,Uout)
 # endif
      INTEGER,DIMENSION(M,N),INTENT(IN) :: MASK
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Uout
+     INTEGER :: I,J
 
      DO J=Jbeg,Jend
      DO I=Ibeg,Iend
@@ -201,6 +205,7 @@ SUBROUTINE DERIVATIVE_YY(M,N,Ibeg,Iend,Jbeg,Jend,MASK,DY,Uin,Uout)
 # endif
      INTEGER,DIMENSION(M,N),INTENT(IN) :: MASK
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Uout
+     INTEGER :: I,J
 
      DO J=Jbeg,Jend
      DO I=Ibeg,Iend
@@ -235,6 +240,8 @@ SUBROUTINE DERIVATIVE_XY(M,N,Ibeg,Iend,Jbeg,Jend,MASK,DX,DY,Uin,Uout)
 # endif
      INTEGER,DIMENSION(M,N),INTENT(IN) :: MASK
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Uout
+     INTEGER :: I,J
+     REAL(SP) :: tmp1,tmp2
 
      DO J=Jbeg,Jend
      DO I=Ibeg,Iend
@@ -272,6 +279,7 @@ SUBROUTINE DERIVATIVE_XX(M,N,Ibeg,Iend,Jbeg,Jend,MASK,DX,Uin,Uout)
 # endif
      INTEGER,DIMENSION(M,N),INTENT(IN) :: MASK
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Uout
+     INTEGER :: I,J
 
 ! I assume no 2nd derivative 
      DO J=Jbeg,Jend
@@ -308,6 +316,8 @@ SUBROUTINE DERIVATIVE_XY_HIGH(M,N,Ibeg,Iend,Jbeg,Jend,MASK,DX,DY,Uin,Uout)
 # endif
      INTEGER,DIMENSION(M,N),INTENT(IN) :: MASK
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Uout
+     INTEGER :: I,J
+     REAL(SP) :: tmp1,tmp2,tmp3,tmp4
 
      DO J=Jbeg,Jend
      DO I=Ibeg,Iend
@@ -360,6 +370,7 @@ SUBROUTINE DERIVATIVE_XX_HIGH(M,N,Ibeg,Iend,Jbeg,Jend,MASK,DX,Uin,Uout)
 # endif
      INTEGER,DIMENSION(M,N),INTENT(IN) :: MASK
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Uout
+     INTEGER :: I,J
 
 ! I assume no 2nd derivative 
      DO J=Jbeg,Jend
@@ -396,6 +407,7 @@ SUBROUTINE DERIVATIVE_YY_HIGH(M,N,Ibeg,Iend,Jbeg,Jend,MASK,DY,Uin,Uout)
 # endif
      INTEGER,DIMENSION(M,N),INTENT(IN) :: MASK
      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Uout
+     INTEGER :: I,J
 
      DO J=Jbeg,Jend
      DO I=Ibeg,Iend

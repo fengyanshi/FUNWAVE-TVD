@@ -174,6 +174,7 @@ SUBROUTINE HLL(M,N,SL,SR,FL,FR,UL,UR,FOUT)
      INTEGER,INTENT(IN)::M,N
      REAL(SP),INTENT(IN),DIMENSION(M,N)::SL,SR,FL,FR,UL,UR
      REAL(SP),INTENT(OUT),DIMENSION(M,N)::FOUT
+     INTEGER :: I,J
 
       DO J=1,N
       DO I=1,M     
@@ -249,6 +250,8 @@ SUBROUTINE DelyFun(DY,M,N,DIN,DOUT)
      REAL(SP),INTENT(IN),DIMENSION(M,N)::DIN
      REAL(SP),INTENT(OUT),DIMENSION(M,N)::DOUT
 !     REAL(SP) :: VANLEER_LIMITER
+     INTEGER :: I,J
+     REAL(SP) :: TMP1,TMP2
 
 ! van Leer Limiter     
      DO I=1,M
@@ -303,6 +306,8 @@ SUBROUTINE DelxFun(DX,M,N,DIN,DOUT)
      REAL(SP),INTENT(IN),DIMENSION(M,N)::DIN
      REAL(SP),INTENT(OUT),DIMENSION(M,N)::DOUT
 !     REAL(SP) :: VANLEER_LIMITER
+     INTEGER :: I,J
+     REAL(SP) :: TMP1,TMP2
 
 ! van Leer Limiter     
      DO I=2,M-1
@@ -359,8 +364,9 @@ SUBROUTINE WAVE_SPEED(M,N,M1,N1,UL,UR,VL,VR,HxL,HxR,HyL,HyR,&
      REAL(SP),INTENT(IN),DIMENSION(M1,N)::UL,UR,HxL,HxR
      REAL(SP),INTENT(IN),DIMENSION(M,N1)::VL,VR,HyL,HyR
      REAL(SP),INTENT(OUT),DIMENSION(M1,N)::SxL,SxR
-     REAL(SP),INTENT(OUT),DIMENSION(M,N1)::SyL,SyR         
+     REAL(SP),INTENT(OUT),DIMENSION(M,N1)::SyL,SyR
      REAL(SP)::SQR_PHI_L,SQR_PHI_R,SQR_PHI_S,U_S
+     INTEGER :: I,J
 
 
 ! Zhou et al., 2001 approach
@@ -712,6 +718,7 @@ SUBROUTINE CONSTRUCT_Y(M,N,N1,DY,Vin,Din,OutL,OutR,Kappa)
      REAL(SP),INTENT(IN),DIMENSION(M,N)::Vin,Din
      REAL(SP),INTENT(IN) :: Kappa
      REAL(SP),INTENT(OUT),DIMENSION(M,N1)::OutL,OutR
+     INTEGER :: I,J
      nop(Kappa)
 
 ![ykchoi (08/28/2016)
@@ -769,6 +776,7 @@ SUBROUTINE CONSTRUCT_X(M,M1,N,DX,Vin,Din,OutL,OutR,Kappa)
      REAL(SP),INTENT(IN),DIMENSION(M,N)::Vin,Din
      REAL(SP),INTENT(IN)::Kappa
      REAL(SP),INTENT(OUT),DIMENSION(M1,N)::OutL,OutR
+     INTEGER I,J
      nop(Kappa)
 
 ![ykchoi (08/28/2016)
@@ -1055,6 +1063,7 @@ SUBROUTINE CONSTRUCT_HO_X_minmod(M,N,M1,Ibeg,Iend,Jbeg,Jend,DX,MASK,Vin,OutL,Out
 
      REAL(SP),DIMENSION(M,N) :: Din
      REAL(SP) :: TXP1,TXP2,TXP3,TXP4,DVP1,DVP2,DVP3
+     INTEGER :: I,J
      nop(DX)
 
      ! estimate Din first
@@ -1174,6 +1183,7 @@ SUBROUTINE CONSTRUCT_HO_Y_minmod(M,N,N1,Ibeg,Iend,Jbeg,Jend,DY,MASK,Vin,OutL,Out
 
      REAL(SP),DIMENSION(M,N) :: Din
      REAL(SP) :: TYP1,TYP2,TYP3,TYP4,DVP1,DVP2,DVP3
+     INTEGER :: I,J
      nop(DY)
 
      ! estimate Din first
@@ -1540,7 +1550,8 @@ SUBROUTINE CONSTRUCT_HO_X(M,N,M1,Ibeg,Iend,Jbeg,Jend,MASK,Vin,OutL,OutR)
      REAL(SP),DIMENSION(M,N) :: Din
      REAL(SP) :: TXP1,TXP2,TXP3,DVP1,DVP2,DVP3
 
-     REAL(SP) :: VAN1, VAN2, RAT
+     REAL(SP) :: VAN1, VAN2, RAT, TMP1, TMP2
+     INTEGER :: I,J
 
      Din=0.0_SP
      DO J=Jbeg,Jend
@@ -1655,7 +1666,8 @@ SUBROUTINE CONSTRUCT_HO_Y(M,N,N1,Ibeg,Iend,Jbeg,Jend,MASK,Vin,OutL,OutR)
      REAL(SP),DIMENSION(M,N) :: Din
      REAL(SP) :: TYP1,TYP2,TYP3,DVP1,DVP2,DVP3
 
-     REAL(SP) :: VAN1, VAN2, RAT
+     REAL(SP) :: VAN1, VAN2, RAT, TMP1, TMP2
+     INTEGER :: I,J
 
      Din=0.0_SP
      DO I=Ibeg,Iend
@@ -1970,6 +1982,7 @@ SUBROUTINE CONSTRUCT_HO_X_MLP(M,N,M1,Ibeg,Iend,Jbeg,Jend,MASK,Vin,OutL,OutR)
      REAL(SP) :: delsol, tanth1, tanth2, gamRtanth2, gamLtanth1
      REAL(SP) :: alphLin, alphL, slopeL
      REAL(SP) :: alphRin, alphR, slopeR
+     INTEGER :: I,J
      nop(MASK)
 
      smallv = 0.0000000001_SP
@@ -2045,6 +2058,7 @@ SUBROUTINE CONSTRUCT_HO_Y_MLP(M,N,N1,Ibeg,Iend,Jbeg,Jend,MASK,Vin,OutL,OutR)
      REAL(SP) :: delsol, tanth1, tanth2, gamRtanth2, gamLtanth1
      REAL(SP) :: alphLin, alphL, slopeL
      REAL(SP) :: alphRin, alphR, slopeR
+     INTEGER :: I,J
      nop(MASK)
 
      smallv = 0.0000000001_SP
@@ -2312,6 +2326,7 @@ SUBROUTINE WENO_CONSTRUCT_X( M, N, M1, Ibeg, Iend, Jbeg, Jend, Vin, OutL, OutR )
        REAL(SP) :: WBETA0, WBETA1, WBETA2
        REAL(SP) :: TXP1, TXP2, TXP3, W0BAR, W1BAR, W2BAR, WNW0, WNW1, WNW2
        REAL(SP) :: WNP0, WNP1, WNP2
+       INTEGER :: I,J
 
        WNEPS = 1.0E-06
        R0_R = 3.0_SP/10.0_SP;  R1_R = 3.0_SP/5.0_SP;  R2_R = 1.0_SP/10.0_SP;
@@ -2403,6 +2418,7 @@ SUBROUTINE WENO_CONSTRUCT_Y( M, N, N1, Ibeg, Iend, Jbeg, Jend, Vin, OutL, OutR )
        REAL(SP) :: WBETA0, WBETA1, WBETA2
        REAL(SP) :: TYP1, TYP2, TYP3, W0BAR, W1BAR, W2BAR, WNW0, WNW1, WNW2
        REAL(SP) :: WNP0, WNP1, WNP2
+       INTEGER :: I,J
 
        WNEPS = 1.0E-06
        R0_R = 3.0_SP/10.0_SP;  R1_R = 3.0_SP/5.0_SP;  R2_R = 1.0_SP/10.0_SP;

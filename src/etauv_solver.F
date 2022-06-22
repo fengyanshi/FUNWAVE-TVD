@@ -64,6 +64,7 @@ SUBROUTINE ESTIMATE_HUV(ISTEP)
      REAL(SP)::xmk,ymk
 ! now work for spherical # endif
      REAL(SP)::DXg,DYg
+     INTEGER :: I,J
 
 ! MUSCL-Hancock, Zhou et al., p. 7
 
@@ -306,6 +307,8 @@ SUBROUTINE GET_Eta_U_V_HU_HV
 # if defined (CARTESIAN)
      REAL(SP)::reta,retal,retar
 # endif
+     INTEGER :: I,J
+     REAL(SP) :: tmp1,tmp2,tmp3,tmp4
 
 ! calculate etar, u and vetar, HU, HV
      H=Eta*Gamma3+Depth

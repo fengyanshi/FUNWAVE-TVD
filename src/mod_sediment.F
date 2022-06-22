@@ -121,6 +121,9 @@ SUBROUTINE SEDIMENT_INITIAL
 
   CHARACTER(LEN=80)::FILE_NAME=' '
   INTEGER :: ierr
+# if !defined (PARALLEL)
+  INTEGER :: I,J
+# endif
 
 ! read  from input.txt
       FILE_NAME=INPUT_FILE_NAME
@@ -859,6 +862,8 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
   REAL(SP),DIMENSION(Ibeg:Iend,Jbeg:Jend)::R1
   REAL(SP) :: Weight0 = 0.9_SP, Weight1=0.1_SP
   REAL(SP) :: Angle_cur,bedf,fr,Pd,Cb
+  INTEGER :: I,J
+  REAL(SP) :: tmp1,tmp2
 
     ALLOCATE(Scalx(Mloc1,Nloc),Scaly(Mloc,Nloc1))
 
@@ -1253,6 +1258,7 @@ SUBROUTINE MORPHOLOGICAL_CHANGE
   INTEGER :: VTYPE,i4,i4_record
   REAL(SP) :: slope_max,dh
   REAL(SP),DIMENSION(4) :: slope4
+  INTEGER :: I,J
 
     DO J=Jbeg,Jend
     DO I=Ibeg,Iend

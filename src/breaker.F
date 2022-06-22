@@ -114,8 +114,10 @@ SUBROUTINE BREAKING(M,N,ETAx,ETAy,ETAT,Cbrk1,Cbrk2,H,MinDepthFrc,&
      REAL(SP),DIMENSION(M,N),INTENT(IN)::ETAx,ETAy,ETAt,H
      REAL(SP),DIMENSION(M,N),INTENT(OUT)::AGE
      REAL(SP)::C,C1,R,Angle,AGE1,AGE2,AGE3,propx,propy,propxy
+     INTEGER :: I,J
+     REAL(SP) :: tmp1,tmp2,tmp3,tmp4
 
-    
+
 ! ykchoi: do loop should start jbeg-1 end jend+1 because
 !         the ghost cells are used in source.F, 10/27/2017
      DO J = Jbeg-1, Jend+1

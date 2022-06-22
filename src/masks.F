@@ -59,6 +59,7 @@ SUBROUTINE UPDATE_MASK
 # if defined (PARALLEL)
      REAL(SP)::myvar
 # endif
+     INTEGER :: I,J
 
      ALLOCATE(MASKtmp(Mloc,Nloc),MASK9tmp(Mloc,Nloc))
      ALLOCATE(ETAtmp(Mloc,Nloc))

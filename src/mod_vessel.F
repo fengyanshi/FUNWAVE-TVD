@@ -83,8 +83,6 @@ MODULE VESSEL_MODULE
                                            Gz
     REAL(SP),DIMENSION(:),ALLOCATABLE :: Uvel,Vvel
 
-    REAL(SP) :: Xves,Yves,Lves,Wves,P_x,P_y,DetaX,DetaY
-
 !   deep draft vessel
 
 # if defined (DEEP_DRAFT_VESSEL)
@@ -111,7 +109,7 @@ CONTAINS
 ! READ VESSEL
 
 SUBROUTINE VESSEL_INITIAL
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL, INPUT_FILE_NAME
+  USE GLOBAL,ONLY : SMALL, INPUT_FILE_NAME
   USE INPUT_READ
   IMPLICIT NONE
   CHARACTER(LEN=80)::FILE_NAME=' '
@@ -120,6 +118,7 @@ SUBROUTINE VESSEL_INITIAL
   CHARACTER(LEN=80)::TMP_NAME=' '
   CHARACTER(LEN=80)::VesselName = ' '
   INTEGER :: Ifile,ierr
+  INTEGER :: itmp1,itmp2,itmp3,itmp4,itmp5
 
 
 ! read vessel number and folder from input.txt
@@ -396,14 +395,15 @@ SUBROUTINE VESSEL_INITIAL
 End SUBROUTINE VESSEL_INITIAL
 
 SUBROUTINE VESSEL_FORCING
-  USE GLOBAL,ONLY : Mloc,Nloc,tmp1,tmp2,SMALL,TIME,ZERO,DX,DY,DT
+  USE GLOBAL,ONLY : Mloc,Nloc,SMALL,TIME,ZERO,DX,DY,DT
 # if defined (DEEP_DRAFT_VESSEL)
   USE GLOBAL,ONLY : DEPTH
 # endif
   USE INPUT_READ
   IMPLICIT NONE
   INTEGER :: Ifile,I,J
-
+  REAL(SP):: tmp1,tmp2
+  REAL(SP) :: Xves,Yves
 
   VesselFluxGradient = ZERO
 
@@ -562,11 +562,13 @@ SUBROUTINE PRESSURE_SOURCE (Xves,Yves)
   USE GLOBAL,ONLY : Mloc,Nloc,SMALL,ZERO, &
                     DX,DY,Ibeg,Iend,Jbeg,Jend
   IMPLICIT NONE
+  REAL(SP),INTENT(IN) :: Xves,Yves
   INTEGER :: I,J
-  REAL(SP) :: Xves,Yves,Lves,Wves
+  REAL(SP) :: Lves,Wves
 #if defined (PARALLEL)
     REAL(SP) :: myvar
 # endif  
+    REAL(SP) :: DetaX,DetaY,P_x,P_y
 
 ! rectangular
     VesselPressureEach = ZERO
@@ -694,8 +696,9 @@ SUBROUTINE GREEN_FUNCTION_SOURCE (Xves,Yves)
   USE GLOBAL,ONLY : H,U,V, DX,DY,Ibeg,Iend,Jbeg,Jend,SMALL,DEPTH
 # endif
   IMPLICIT NONE
+  REAL(SP),INTENT(IN) :: Xves,Yves
   INTEGER :: I,J
-  REAL(SP) :: Xves,Yves,Lves,Wves
+  REAL(SP) :: Lves,Wves
 
 
   VesselFluxGradientEach = ZERO
@@ -783,8 +786,9 @@ END SUBROUTINE GREEN_FUNCTION_SOURCE
 SUBROUTINE SLENDER_BODY_SOURCE (Xves,Yves)
   USE GLOBAL,ONLY : Mloc,Nloc,SMALL,ZERO
   IMPLICIT NONE
+  REAL(SP),INTENT(IN) :: Xves,Yves
   INTEGER :: I,J
-  REAL(SP) :: Xves,Yves,Lves,Wves
+  REAL(SP) :: Lves,Wves
   REAL(SP) :: x_right_1, x_right_2, x_left_1, x_left_2
 
 

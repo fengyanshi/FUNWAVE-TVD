@@ -147,7 +147,7 @@ SUBROUTINE READ_INPUT
     IMPLICIT NONE
     CHARACTER(LEN=80) FILE_NAME
     CHARACTER(LEN=80) MKFOLDER
-    INTEGER :: ierr
+    INTEGER :: I,J,ierr
     LOGICAL :: INPUT_PHASE = .FALSE.
 
     !>by Zhouteng Ye
@@ -156,6 +156,10 @@ SUBROUTINE READ_INPUT
 ![ykchoi
     CHARACTER(LEN=80)::FDIR=' '
 !ykchoi]
+
+# if defined (INTEL)
+    INTEGER :: RES
+# endif
 
 # if defined (PARALLEL)
     CALL MPI_COMM_SIZE (MPI_COMM_WORLD, nprocs, ier)   !ykchoi(04/May/2017)
@@ -3769,7 +3773,7 @@ SUBROUTINE STATIONS
      USE INPUT_READ
      IMPLICIT NONE
 
-     INTEGER :: iunit
+     INTEGER :: i,j,k,iunit
      INTEGER, DIMENSION(:),ALLOCATABLE :: BufferCount
      REAL(SP),DIMENSION(:,:,:),ALLOCATABLE :: ZUV_Buffer
      REAL(SP) :: dum1,dum2
@@ -3924,6 +3928,7 @@ SUBROUTINE STATIONS_SPHERICAL_IJ
      CHARACTER(LEN=80)::TMP_NAME=' '
      CHARACTER(LEN=80)::FDIR=' '
      LOGICAL :: FirstCallStation = .TRUE.
+     INTEGER :: i,j,k
      SAVE FirstCallStation, BufferCount,ZUV_Buffer
 
 ! initialize stations
@@ -4054,6 +4059,7 @@ SUBROUTINE STATIONS
      CHARACTER(LEN=80)::TMP_NAME=' '
      CHARACTER(LEN=80)::FDIR=' '
      LOGICAL :: FirstCallStationSP = .TRUE.
+     INTEGER :: i,j,k
      SAVE FirstCallStationSP, BufferCount,ZUV_Buffer
 
 
@@ -4203,6 +4209,7 @@ SUBROUTINE PREVIEW
      CHARACTER(LEN=80)::FILE_NAME=' '
      CHARACTER(LEN=80)::TMP_NAME=' '
      CHARACTER(LEN=80)::FDIR=' '
+     INTEGER :: itmp1,itmp2,itmp3,itmp4,itmp5 
 
      FDIR=TRIM(RESULT_FOLDER)
 
@@ -4436,6 +4443,7 @@ SUBROUTINE PREVIEW_MEAN
      CHARACTER(LEN=80)::FILE_NAME=' '
      CHARACTER(LEN=80)::FDIR=' '
      CHARACTER(LEN=80)::TMP_NAME=' '
+     INTEGER :: itmp1,itmp2,itmp3,itmp4,itmp5
 
      FDIR=TRIM(RESULT_FOLDER)
 
@@ -4515,6 +4523,7 @@ SUBROUTINE GetFile(FILE,PHI)
      INTEGER :: istatus(mpi_status_size)
      REAL(SP), ALLOCATABLE :: xx(:,:)
 ! -------ykchoi (08/May/2017) ]
+     INTEGER :: I,J
 
 ! TEMP
 
@@ -4647,6 +4656,7 @@ SUBROUTINE PutFile(FILE,PHI)
      REAL(SP),DIMENSION(Mloc,Nloc),INTENT(IN) :: PHI
      CHARACTER(LEN=80) FILE
      LOGICAL :: FirstCallPutFile = .TRUE.
+     INTEGER :: I,J
      SAVE  FirstCallPutFile
 
 ! first time call 
@@ -4693,6 +4703,7 @@ SUBROUTINE OUTPUT_VESSEL
      IMPLICIT NONE
      CHARACTER(LEN=80)::FDIR=' '
      LOGICAL :: FirstCallVessel = .TRUE.
+     INTEGER :: i
      SAVE FirstCallVessel
 
 # if defined (PARALLEL)

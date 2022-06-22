@@ -60,6 +60,7 @@ SUBROUTINE INDEX
     INTEGER :: icp
     INTEGER :: myidi, myidj, irank
     INTEGER, ALLOCATABLE :: iistas(:), iiends(:), jjstas(:), jjends(:)
+    INTEGER :: i,j
 # endif
 !--------------ykchoi 02/May/2017]
 
@@ -236,7 +237,8 @@ SUBROUTINE ESTIMATE_DT(M,N,DX,DY,U,V,H,MinDepthFrc,DT,CFL,TIME)
      REAL(SP),INTENT(IN)::CFL,MinDepthFrc
      REAL(SP),INTENT(OUT)::DT
      REAL(SP),INTENT(INOUT)::TIME
-     REAL(SP) :: DT_tmp
+     REAL(SP) :: DT_tmp,tmp1,tmp2,tmp3
+     INTEGER :: I,J
 
      TMP3=LARGE
      DO J=1,N
@@ -316,6 +318,7 @@ SUBROUTINE MAX_MIN_PROPERTY
 # if !defined (CARTESIAN)
     REAL(SP) :: omega_0
 # endif
+    INTEGER :: I,J
 
       DO J=1,Nloc
       DO I=1,Mloc

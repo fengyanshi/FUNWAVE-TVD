@@ -250,7 +250,7 @@ SUBROUTINE INITIALIZATION
      USE IFPORT
 # endif
      IMPLICIT NONE
-     INTEGER :: VTYPE
+     INTEGER :: I,J,VTYPE
 # if defined (PARALLEL)
      REAL(SP),DIMENSION(:,:),ALLOCATABLE :: VarGlob
      REAL(SP) :: myvar_tmp
@@ -1090,8 +1090,7 @@ SUBROUTINE INITIALIZATION
 # endif
  
 
-# if defined(CARTESIAN)
-# else
+# if !defined(CARTESIAN)
     ! use slope control in caution, should set false unless for a spherical
     ! ocean basin domain and a huge slope at coastline. 
     SLOPE_CTR = .FALSE.
@@ -1203,6 +1202,9 @@ SUBROUTINE INITIAL_UVZ
       IMPLICIT NONE
       REAL(SP),DIMENSION(Mloc,Nloc) :: rMASK
       LOGICAL :: FILE_EXIST
+# if !defined (PARALLEL)
+      INTEGER :: I,J
+# endif
 
 IF(.NOT.NO_UV_FILE)THEN
 

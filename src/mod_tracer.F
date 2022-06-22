@@ -66,7 +66,6 @@ MODULE TRACER
      IMPLICIT NONE
 
 
-     INTEGER :: II,JJ
      REAL(SP),SAVE :: TRACK_TIME_COUNT = 0.0_SP
      REAL(SP),SAVE,DIMENSION(:),ALLOCATABLE :: X_TRACK,Y_TRACK,Sc,S1,S2,S3,&
                    U_TRACER,V_TRACER,X_TRACK_PRE,Y_TRACK_PRE, &
@@ -93,6 +92,7 @@ MODULE TRACER
 SUBROUTINE TRACER_INITIAL
 
       USE GLOBAL, ONLY : INPUT_FILE_NAME
+      IMPLICIT NONE
       INTEGER :: I_tmp, ierr
       CHARACTER(LEN=80) :: WHAT
       CHARACTER(LEN=80) :: TRACER_FILE,FILE_NAME
@@ -176,9 +176,11 @@ SUBROUTINE TRACER_INITIAL
 END SUBROUTINE TRACER_INITIAL
 
 SUBROUTINE GET_XY_POSITION
+      IMPLICIT NONE
       REAL(SP) :: x1,x2,x3,y1,y2,y3,&
                   area1,area2,area3
-      INTEGER :: I_start,I_end,J_start,J_end,search_count
+      INTEGER :: I,I_start,I_end,J_start,J_end,search_count
+      INTEGER :: II,JJ
 
 ! ---  areas of the four triangles, area will be negative
 !      if an order is clockwise
@@ -370,7 +372,8 @@ SUBROUTINE GET_XY_POSITION
 END SUBROUTINE GET_XY_POSITION
 
 SUBROUTINE TRACK_XY
-
+     IMPLICIT NONE
+     INTEGER :: I
        X_TRACK_PRE = X_TRACK
        Y_TRACK_PRE = Y_TRACK
        nx1_pre=nx1
@@ -417,7 +420,7 @@ END SUBROUTINE TRACK_XY
 # if defined (PARALLEL)
 SUBROUTINE BROADCAST_XY
      IMPLICIT NONE
-     INTEGER :: l
+     INTEGER :: I,l
      INTEGER,DIMENSION(NumberProcessor) :: npxs,npys
      REAL(SP),DIMENSION(NumberProcessor) :: xx
      LOGICAL,DIMENSION(NumberProcessor) :: yy
@@ -502,6 +505,8 @@ END SUBROUTINE BROADCAST_XY
 # endif
 
 SUBROUTINE MOVE_TRACER
+     IMPLICIT NONE
+     INTEGER :: I
 
         DO I=1,NumTracker
            IF(IN_CELL(I).AND.TIME>TRACKER_START(I))THEN            
@@ -548,6 +553,7 @@ SUBROUTINE OUTPUT_TRACKING
      IMPLICIT NONE
      LOGICAL, SAVE :: FirstCallTrackingOutput = .TRUE.
      CHARACTER(LEN=14)::FORMAT_LEN_TRACKING=' '
+     INTEGER :: I
 
 # if defined (PARALLEL)
     if(myid==0)then

@@ -63,6 +63,8 @@ SUBROUTINE WAVEMAKER_INITIALIZATION
      REAL(SP),DIMENSION(:),ALLOCATABLE :: DireTmp,FreqTmp
      REAL(SP),DIMENSION(:,:),ALLOCATABLE :: WaveCompTmp,Phase2DTmp
      LOGICAL :: INPUT_WAVE_PHASE = .FALSE.
+     INTEGER :: I,J
+     REAL(SP) :: tmp1,tmp2,tmp3
 ! internal wavemaker of wei and kirby
 
      IF(WaveMaker(1:6)=='WK_REG') THEN
@@ -644,8 +646,8 @@ SUBROUTINE WK_WAVEMAKER_2D_SPECTRAL_DATA &
      REAL(SP),DIMENSION(NumDir) :: Dire
      REAL(SP),DIMENSION(NumFreq,NumDir),INTENT(IN) :: WAVE_COMP
      REAL(SP),INTENT(IN) :: H_gen,delta,PeakPeriod
-     INTEGER :: nfre,ndir
-     REAL(SP) :: angle1,angle2
+     INTEGER :: I,J,nfre,ndir
+     REAL(SP) :: angle1,angle2,tmp1,tmp2,tmp3
 
      Dire=DireD*DEG2RAD
 
@@ -699,6 +701,7 @@ SUBROUTINE WK_WAVEMAKER_2D_SPECTRAL_DATA &
 
       ELSEIF(Dire(ndir).LT.ZERO)THEN
        tmp3=ZERO
+       J=1                    !added to avoid warning 
        I=0
        Do WHILE (tmp3>Dire(ndir))
          I=I+1
@@ -841,7 +844,7 @@ SUBROUTINE CALCULATE_Cm_Sm(M,N,DX,DY,Xc,Ibeg,Jbeg,mfreq,mtheta,D_gen,phi1, &
      REAL(SP),DIMENSION(mfreq,mtheta),INTENT(IN) :: D_gen,phi1,rlamda 
      REAL(SP),DIMENSION(mfreq),INTENT(IN) :: beta_gen
      REAL(SP),DIMENSION(M,N,mfreq),INTENT(OUT) :: Cm,Sm
-     INTEGER::kf,ktheta
+     INTEGER::I,J,kf,ktheta
      nop(width)
 
         Cm=ZERO
@@ -901,7 +904,7 @@ END SUBROUTINE CALCULATE_Cm_Sm
 !
 !-------------------------------------------------------------------------------------
 SUBROUTINE CALCULATE_DATA2D_Cm_Sm
-     USE GLOBAL, ONLY : Mloc,Nloc,I,J,DX,DY,ZERO,Beta_ref
+     USE GLOBAL, ONLY : Mloc,Nloc,DX,DY,ZERO,Beta_ref
      USE GLOBAL, ONLY : SP,PI,Grav,Amp_Ser,Per_Ser,Dep_Ser,&
                        Theta_Ser, Ibeg,Jbeg,&
                        Wave_Number_Ser,Stokes_Drift_Ser,NumFreq,NumDir,&
@@ -914,6 +917,7 @@ SUBROUTINE CALCULATE_DATA2D_Cm_Sm
      INTEGER :: Iter,KK,KKK
      REAL(SP) :: Celerity,Wave_Length,Fk,Fkdif,Zlev,Fact,X_maker,Y_maker
      REAL(SP) :: Theta_Per
+     INTEGER :: I,J
 
 
        ALLOCATE(Cm_eta(Mloc,Nloc,Numfreq),Sm_eta(Mloc,Nloc,Numfreq), &
@@ -1055,6 +1059,8 @@ SUBROUTINE CalcPeriodicTheta(WaveNumber,InputRAD,OutputRAD)
      REAL(SP) :: angle1,angle2
      REAL(SP),INTENT(IN) :: WaveNumber,InputRAD
      REAL(SP),INTENT(OUT) :: OutputRAD
+     INTEGER :: I,J
+     REAL(SP) :: tmp2,tmp3
 
      IF(InputRAD*180/pi.GE.90.0_SP.OR.InputRAD*180/pi.LE.-90.0_SP)THEN
 # if defined (PARALLEL)
@@ -1073,6 +1079,7 @@ SUBROUTINE CalcPeriodicTheta(WaveNumber,InputRAD,OutputRAD)
      IF(ABS(InputRAD).GT.SMALL)THEN
        IF(InputRAD.GT.ZERO)THEN
          tmp3=ZERO
+         J=1                    !added to avoid warning 
          I=0
          Do WHILE (tmp3<InputRAD)
          I=I+1
@@ -1105,6 +1112,7 @@ SUBROUTINE CalcPeriodicTheta(WaveNumber,InputRAD,OutputRAD)
 
        ELSEIF(InputRAD.LT.ZERO)THEN
          tmp3=ZERO
+         J=1                    !added to avoid warning 
          I=0
          Do WHILE (tmp3>InputRAD)
            I=I+1
@@ -1189,7 +1197,7 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm &
                 sigma_theta_input)
      USE PARAM
 ! *** from data2d_cm_sm
-     USE GLOBAL, ONLY : Mloc,Nloc,I,J,DX,DY,ZERO,Beta_ref,PERIODIC
+     USE GLOBAL, ONLY : Mloc,Nloc,DX,DY,ZERO,Beta_ref,PERIODIC
      USE GLOBAL, ONLY : Amp_Ser,Per_Ser,Phase_Ser,Dep_Ser,&
                        Theta_Ser, Ibeg,Jbeg,&
                        Wave_Number_Ser,Stokes_Drift_Ser,NumFreq,NumDir,&
@@ -1215,7 +1223,7 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm &
                  alpha_spec,ap,&
                  theta,alpha,alpha1,tb,tc,wkn,C_phase,wave_length
      INTEGER :: kf,kff,kb,N_spec,ktotal,k_n,ktheta
-     INTEGER :: KK,KKK
+     INTEGER :: I,J,K,KK,KKK
      REAL(SP) :: Zlev,Fact,X_maker,Y_maker,Theta_Per
      
      REAL(SP) :: sumAG   !ykchoi (11/07/2016)
@@ -1530,7 +1538,7 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm_EQUAL_DFREQ &
                 sigma_theta_input)
      USE PARAM
 ! *** from data2d_cm_sm
-     USE GLOBAL, ONLY : Mloc,Nloc,I,J,DX,DY,ZERO,Beta_ref,PERIODIC
+     USE GLOBAL, ONLY : Mloc,Nloc,DX,DY,ZERO,Beta_ref,PERIODIC
      USE GLOBAL, ONLY : Amp_Ser,Per_Ser,Phase_Ser,Dep_Ser,&
                        Theta_Ser, Ibeg,Jbeg,&
                        Wave_Number_Ser,Stokes_Drift_Ser,NumFreq,NumDir,&
@@ -1557,7 +1565,7 @@ SUBROUTINE CALCULATE_TMA_Cm_Sm_EQUAL_DFREQ &
                  theta,alpha,alpha1,tb,tc,wkn,C_phase,wave_length,&
                  df
      INTEGER :: kf,kff,N_spec,ktotal,k_n,ktheta
-     INTEGER :: KK,KKK
+     INTEGER :: I,J,KK,KKK
      REAL(SP) :: Zlev,Fact,X_maker,Y_maker,Theta_Per
      
      REAL(SP) :: sumAG   !ykchoi (11/07/2016)
@@ -1849,8 +1857,8 @@ SUBROUTINE WK_WAVEMAKER_IRREGULAR_WAVE &
      REAL(SP) :: Ef,fre,omiga_spec,phi,sigma_spec,Etma,Ef100,Ef_add,sigma_theta,&
                  alpha_spec,ap,&
                  theta,alpha,alpha1,tb,tc,wkn,C_phase,wave_length,rl_gen,rI,&
-                 omgn_tmp
-     INTEGER :: kf,kff,kb,N_spec,ktotal,k_n,ktheta
+                 omgn_tmp,tmp1,tmp2,tmp3
+     INTEGER :: I,k,kf,kff,kb,N_spec,ktotal,k_n,ktheta
 
      REAL(SP) :: sumAG   !ykchoi (11/07/2016)
 
@@ -2142,8 +2150,8 @@ SUBROUTINE WK_EQUAL_DFREQ_IRREGULAR_WAVE &
      REAL(SP) :: Ef,omiga_spec,phi,sigma_spec,Etma,sigma_theta,&
                  alpha_spec,ap,&
                  theta,alpha,alpha1,tb,tc,wkn,C_phase,wave_length,rl_gen,rI,&
-                 omgn_tmp,df
-     INTEGER :: kf,kff,N_spec,ktotal,k_n,ktheta
+                 omgn_tmp,df,tmp1,tmp2,tmp3
+     INTEGER :: I,kf,kff,N_spec,ktotal,k_n,ktheta
 
      REAL(SP) :: sumAG   !ykchoi (11/07/2016)
 
@@ -2415,6 +2423,7 @@ SUBROUTINE WK_WAVEMAKER_TIME_SERIES &
      REAL(SP),INTENT(OUT) :: width
      REAL(SP),DIMENSION(NumWaveComp,3),INTENT(IN) :: WAVE_COMP
      REAL(SP),INTENT(IN) :: H_gen,delta,PeakPeriod
+     INTEGER :: I
 
 !        theta=Theta_WK*pi/180.
         theta = ZERO  ! assume zero because no or few cases include directions
@@ -2490,6 +2499,8 @@ SUBROUTINE VISCOSITY_WMAKER (M,N,ETAT,visbrk,H,MinDepthFrc,DX,DY)
      REAL(SP),DIMENSION(M,N),INTENT(IN) :: DX,DY
 # endif
      REAL(SP),DIMENSION(M,N),INTENT(IN) :: ETAt,H
+     INTEGER :: I,J
+     REAL(SP) :: tmp2,tmp3
      
      DO J=Nghost+1,N-Nghost
      DO I=Nghost+1,M-Nghost
@@ -2548,7 +2559,7 @@ END SUBROUTINE VISCOSITY_WMAKER
 !-------------------------------------------------------------------------------------
 SUBROUTINE IRREGULAR_LEFT_BC
      USE PARAM
-     USE GLOBAL, ONLY : ETA,U,V,Mloc,Nloc,Nghost,I,J,ZERO, &
+     USE GLOBAL, ONLY : ETA,U,V,Mloc,Nloc,Nghost,ZERO, &
                         Depth,HU,HV
      USE GLOBAL, ONLY : SP,PI,Grav,TIME,ISTAGE,DT,NumFreq,Phase_Ser,&
                        Segma_Ser,Cm_eta,Sm_eta,&
@@ -2560,7 +2571,7 @@ SUBROUTINE IRREGULAR_LEFT_BC
 
      IMPLICIT NONE
      REAL(SP) :: RTIME
-     INTEGER :: KK
+     INTEGER :: I,J,KK
      real(SP),DIMENSION(Mloc,Nloc) :: Ein2D
      real(SP),DIMENSION(Mloc,Nloc) :: Uin2D,Vin2D
 
@@ -2639,8 +2650,8 @@ SUBROUTINE WK_NEW_WAVEMAKER_2D_SPECTRAL_DATA &
     REAL(SP),DIMENSION(NumFreq) :: Dire
     REAL(SP),DIMENSION(NumFreq,1),INTENT(IN) :: WAVE_COMP
     REAL(SP),INTENT(IN) :: H_gen,delta,PeakPeriod
-    INTEGER :: nfre
-    REAL(SP) :: Hmo_output
+    INTEGER :: I,nfre
+    REAL(SP) :: Hmo_output,tmp1,tmp2,tmp3
     nop(NumDir)
 
     ! change degree to radian
@@ -2824,11 +2835,12 @@ SUBROUTINE WK_NEW_EQUAL_DFREQ_IRREGULAR_WAVE &
                     alpha_spec,ap,&
                     alpha,alpha1,tb,tc,wkn,C_phase,wave_length,rl_gen,rI,&
                     omgn_tmp,df,correction_coeff,ktheta_temp,Theta_temp
-    INTEGER :: kf,N_spec,k_n
+    INTEGER :: I,kf,N_spec,k_n
     INTEGER, DIMENSION(mfreq) :: displace_theta
     INTEGER :: idx_theta
     ! inclusion of wave coherency
     REAL(SP),INTENT(INOUT) :: alpha_c   ! wave coherence percentage
+    REAL(SP) :: tmp1,tmp2,tmp3
 
 
     df = (fmax-fmin)/(mfreq-1.0_SP)
@@ -3044,7 +3056,7 @@ SUBROUTINE CALCULATE_NEW_Cm_Sm(M,N,DX,DY,Xc,Ibeg,Jbeg,mfreq,mtheta,D_gen,&
     REAL(SP),DIMENSION(mfreq,1),INTENT(IN) :: D_gen,phi1,rlamda
     REAL(SP),DIMENSION(mfreq),INTENT(IN) :: beta_gen
     REAL(SP),DIMENSION(M,N,mfreq),INTENT(OUT) :: Cm,Sm
-    INTEGER::kf
+    INTEGER::I,J,kf
     INTEGER::temp_index,kf_temp,kkk
     nop(width)
     nop(mtheta)
