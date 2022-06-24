@@ -2,16 +2,16 @@ SRC=../src
 DST=../build
 # FLAG_PRECISION = -DDOUBLE_PRECISION 
 FLAG_CARTESIAN = -DCARTESIAN
-FLAG_1  = -DCOUPLING
-FLAG_2  = -DZALPHA
-FLAG_3  = -DMANNING
-FLAG_4  = -DVESSEL
-FLAG_5  = -DMETEO
-FLAG_6  = -DWIND
-FLAG_7  = -DSEDIMENT
-FLAG_8  = -DCHECK_MASS_CONSERVATION
-FLAG_9  = -DTMP
-FLAG_10 = -DTRACKING
+# FLAG_1  = -DCOUPLING
+# FLAG_2  = -DZALPHA
+# FLAG_3  = -DMANNING
+# FLAG_4  = -DVESSEL
+# FLAG_5  = -DMETEO
+# FLAG_6  = -DWIND
+# FLAG_7  = -DSEDIMENT
+# FLAG_8  = -DCHECK_MASS_CONSERVATION
+# FLAG_9  = -DTMP
+# FLAG_10 = -DTRACKING
 ifndef SEQU
   FLAG_PARALLEL = -DPARALLEL
 endif
@@ -49,73 +49,54 @@ $(EXEC): $(OBJS)
 %.o : %.f90
 	$(FC) $(FFLAGS) $(DEBFLGS) $(INCS) -o $@ -c $<
 
+# compile objective to module has no action
+%.mod : %.o
+
 # pre-processors
 %.f90 : $(SRC)/%.F
 	$(CPP) $(CPPARGS) $< $@
 
-#mod_param.f90: $(SRC)/mod_param.F
-#mod_global.f90: $(SRC)/mod_global.F
-#mod_input.f90: $(SRC)/mod_input.F
-#mod_vessel.f90: $(SRC)/mod_vessel.F
-#mod_bathy_correction.f90: $(SRC)/mod_bathy_correction.F
-#mod_meteo.f90: $(SRC)/mod_meteo.F
-#mod_parallel_field_io.f90: $(SRC)/mod_parallel_field_io.F
-#mod_sediment.f90: $(SRC)/mod_sediment.F
-#mod_tide.f90: $(SRC)/mod_tide.F
-#mod_tracer.f90: $(SRC)/mod_tracer.F
-
-#main.f90: $(SRC)/main.F
-#bc.f90: $(SRC)/bc.F
-#fluxes.f90: $(SRC)/fluxes.F
-#init.f90: $(SRC)/init.F
-#io.f90: $(SRC)/io.F
-#tridiagnal.f90: $(SRC)/tridiagnal.F
-#breaker.f90: $(SRC)/breaker.F
-#derivatives.f90: $(SRC)/derivatives.F
-#dispersion.f90: $(SRC)/dispersion.F
-#etauv_solver.f90: $(SRC)/etauv_solver.F
-#sponge.f90: $(SRC)/sponge.F
-#sources.f90: $(SRC)/sources.F
-#masks.f90: $(SRC)/masks.F
-#parallel.f90: $(SRC)/parallel.F
-#statistics.f90: $(SRC)/statistics.F
-#wavemaker.f90: $(SRC)/wavemaker.F
-#mixing.f90: $(SRC)/mixing.F
-#nesting.f90: $(SRC)/nesting.F
-#misc.f90: $(SRC)/misc.F
-#samples.f90: $(SRC)/samples.F
-
 mod_param.o: mod_param.f90
-mod_global.o: mod_global.f90 mod_param.o
-mod_input.o: mod_input.f90 mod_param.o mod_global.o
-mod_vessel.o: mod_vessel.f90 mod_param.o mod_global.o mod_input.o
-mod_bathy_correction.o: mod_bathy_correction.f90 mod_param.o mod_global.o mod_input.o
-mod_meteo.o: mod_meteo.f90 mod_param.o mod_global.o mod_input.o
-mod_parallel_field_io.o: mod_parallel_field_io.f90 mod_global.o
-mod_sediment.o: mod_sediment.f90 mod_param.o mod_global.o mod_input.o
-mod_tide.o: mod_tide.f90 mod_param.o mod_global.o mod_input.o
-mod_tracer.o: mod_tracer.f90 mod_param.o mod_global.o mod_input.o
+param.mod: mod_param.o
+mod_global.o: mod_global.f90 param.mod
+global.mod: mod_global.o
+mod_input.o: mod_input.f90 param.mod global.mod
+input_read.mod: mod_input.o
+mod_vessel.o: mod_vessel.f90 param.mod global.mod input_read.mod
+vessel_module.mod: mod_vessel.o
+mod_bathy_correction.o: mod_bathy_correction.f90 param.mod global.mod input_read.mod
+bathy_correction_module.mod: mod_bathy_correction.o
+mod_meteo.o: mod_meteo.f90 param.mod global.mod input_read.mod
+meteo_module.mod: mod_meteo.o
+mod_parallel_field_io.o: mod_parallel_field_io.f90 global.mod
+parallel_field_io.mod: mod_parallel_field_io.o
+mod_sediment.o: mod_sediment.f90 param.mod global.mod input_read.mod
+sediment_module.mod: mod_sediment.o
+mod_tide.o: mod_tide.f90 param.mod global.mod input_read.mod
+tide_module.mod: mod_tide.o
+mod_tracer.o: mod_tracer.f90 param.mod global.mod input_read.mod
+tracer.mod: mod_tracer.o
 
-main.o: main.f90 mod_global.o mod_vessel.o mod_sediment.o mod_meteo.o mod_tracer.o mod_tide.o
-bc.o: bc.f90 mod_param.o mod_global.o
-fluxes.o: fluxes.f90 mod_param.o mod_global.o
-init.o: init.f90 mod_global.o mod_input.o mod_bathy_correction.o
-io.o: io.f90 mod_param.o mod_global.o mod_input.o mod_vessel.o mod_sediment.o mod_meteo.o mod_tracer.o mod_parallel_field_io.o
-tridiagnal.o: tridiagnal.f90 mod_param.o mod_global.o
-breaker.o: breaker.f90 mod_param.o mod_global.o
-derivatives.o: derivatives.f90 mod_param.o
-dispersion.o: dispersion.f90 mod_global.o
-etauv_solver.o: etauv_solver.f90 mod_global.o mod_vessel.o
-sponge.o: sponge.f90 mod_param.o mod_global.o
-sources.o: sources.f90 mod_global.o mod_vessel.o mod_meteo.o
-masks.o: masks.f90 mod_global.o mod_vessel.o
-parallel.o: parallel.f90 mod_param.o mod_global.o
-statistics.o: statistics.f90 mod_global.o
-wavemaker.o: wavemaker.f90 mod_param.o mod_global.o
-mixing.o: mixing.f90 mod_param.o mod_global.o
-nesting.o: nesting.f90 mod_global.o mod_input.o
-misc.o: misc.f90 mod_param.o mod_global.o mod_meteo.o
-samples.o: samples.f90 mod_param.o mod_global.o
+main.o: main.f90 global.mod vessel_module.mod sediment_module.mod meteo_module.mod tracer.mod tide_module.mod
+bc.o: bc.f90 param.mod global.mod
+fluxes.o: fluxes.f90 param.mod global.mod
+init.o: init.f90 global.mod input_read.mod bathy_correction_module.mod
+io.o: io.f90 param.mod global.mod input_read.mod vessel_module.mod sediment_module.mod meteo_module.mod tracer.mod parallel_field_io.mod
+tridiagnal.o: tridiagnal.f90 param.mod global.mod
+breaker.o: breaker.f90 param.mod global.mod
+derivatives.o: derivatives.f90 param.mod
+dispersion.o: dispersion.f90 global.mod
+etauv_solver.o: etauv_solver.f90 global.mod vessel_module.mod
+sponge.o: sponge.f90 param.mod global.mod
+sources.o: sources.f90 global.mod vessel_module.mod meteo_module.mod
+masks.o: masks.f90 global.mod vessel_module.mod
+parallel.o: parallel.f90 param.mod global.mod
+statistics.o: statistics.f90 global.mod
+wavemaker.o: wavemaker.f90 param.mod global.mod
+mixing.o: mixing.f90 param.mod global.mod
+nesting.o: nesting.f90 global.mod input_read.mod
+misc.o: misc.f90 param.mod global.mod meteo_module.mod
+samples.o: samples.f90 param.mod global.mod
 
 clean:
 	rm -f *.o

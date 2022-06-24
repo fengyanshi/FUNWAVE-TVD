@@ -12,17 +12,15 @@ endif
 
 ifdef SEQU
   FC=gfortran
-  FFLAGS=-nocpp -fimplicit-none -fPIC
+  FFLAGS=-nocpp -fmax-stack-var-size=80000 -fimplicit-none -fPIC
   LFLAGS=
 else
   FC = mpif90
-  FFLAGS=-nocpp -fimplicit-none -fPIC
+  FFLAGS=-nocpp -fmax-stack-var-size=80000 -fimplicit-none -fPIC
   LFLAGS=
 endif
 
 ifdef FLAG_PRECISION
   FFLAGS += -fmax-stack-var-size=80000 -fdefault-real-8
-else
-  FFLAGS += -fmax-stack-var-size=40000
 endif
 
