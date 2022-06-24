@@ -60,7 +60,7 @@ SUBROUTINE phi_exch (PHI)
 
     INTEGER,DIMENSION(MPI_STATUS_SIZE,4) :: status
     INTEGER,DIMENSION(4) :: req
-    INTEGER :: nreq,len
+    INTEGER :: i,j,nreq,len
     REAL(SP),DIMENSION(Mloc,Nghost) :: rNmsg, sNmsg,rSmsg,sSmsg
     REAL(SP),DIMENSION(Nloc,Nghost) :: rWmsg, sWmsg,rEmsg,sEmsg
 
@@ -183,14 +183,14 @@ END SUBROUTINE phi_exch
 ! ******* variable length
 SUBROUTINE phi_exch_variable_length (PHI,Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost)
     USE PARAM
-    USE GLOBAL,ONLY : n_west,n_east,n_suth,n_nrth,npx,npy,px,py,comm2d,ier,ndims,dims,coords,periods
+    USE GLOBAL,ONLY : n_west,n_east,n_suth,n_nrth,comm2d,ier
     IMPLICIT NONE
     REAL(SP),INTENT(INOUT) :: PHI(Mloc,Nloc)
     INTEGER,INTENT(IN) :: Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost
 
     INTEGER,DIMENSION(MPI_STATUS_SIZE,4) :: status
     INTEGER,DIMENSION(4) :: req
-    INTEGER :: nreq,len
+    INTEGER :: i,j,nreq,len
     REAL(SP),DIMENSION(Mloc,Nghost) :: rNmsg, sNmsg,rSmsg,sSmsg
     REAL(SP),DIMENSION(Nloc,Nghost) :: rWmsg, sWmsg,rEmsg,sEmsg
 
@@ -319,7 +319,7 @@ SUBROUTINE phi_int_exch (PHI)
 
     INTEGER,DIMENSION(MPI_STATUS_SIZE,4) :: status
     INTEGER,DIMENSION(4) :: req
-    INTEGER :: nreq,len
+    INTEGER :: i,j,nreq,len
     INTEGER,DIMENSION(Mloc,Nghost) :: rNmsg, sNmsg,rSmsg,sSmsg
     INTEGER,DIMENSION(Nloc,Nghost) :: rWmsg, sWmsg,rEmsg,sEmsg
 
@@ -460,6 +460,7 @@ SUBROUTINE DISTRIBUTE_VarGlob(VarGlob,PHI)
      INTEGER :: istatus(mpi_status_size)
      REAL(SP), ALLOCATABLE :: xx(:,:)
 ! -------ykchoi (08/May/2017) ]
+     INTEGER :: i,j
 
 ! TEMP
 
@@ -506,36 +507,36 @@ SUBROUTINE DISTRIBUTE_VarGlob(VarGlob,PHI)
                       0, MPI_COMM_WORLD, ier )
 
      if( myid == 0 )then
-	 PHI = PHIGLOB( 1:Mloc, 1:Nloc )
+       PHI = PHIGLOB( 1:Mloc, 1:Nloc )
      endif
 
      do irank=1, px*py-1
-	  if( myid == 0 ) then
-	    istanum = Nistas(irank+1) - Nghost
-	    iendnum = Niends(irank+1) + Nghost
-	    jstanum = Njstas(irank+1) - Nghost
+        if( myid == 0 ) then
+          istanum = Nistas(irank+1) - Nghost
+          iendnum = Niends(irank+1) + Nghost
+          jstanum = Njstas(irank+1) - Nghost
           jendnum = Njends(irank+1) + Nghost
 
-	    lenx = iendnum - istanum + 1
-	    leny = jendnum - jstanum + 1
-	    lenxy = lenx*leny
-	    allocate( xx(lenx, leny) )
+          lenx = iendnum - istanum + 1
+          leny = jendnum - jstanum + 1
+          lenxy = lenx*leny
+          allocate( xx(lenx, leny) )
 
-	    xx = PHIGLOB( istanum:iendnum, jstanum:jendnum )
-	    call mpi_isend( xx, lenxy, mpi_sp, irank, 1, mpi_comm_world, ireq, ier )
-	    call mpi_wait( ireq, istatus, ier )
+          xx = PHIGLOB( istanum:iendnum, jstanum:jendnum )
+          call mpi_isend( xx, lenxy, mpi_sp, irank, 1, mpi_comm_world, ireq, ier )
+          call mpi_wait( ireq, istatus, ier )
           deallocate( xx )
 
-	  elseif( myid == irank ) then
-	    
-	    lenx = Niend-Nista+1+2*Nghost
-	    leny = Njend-Njsta+1+2*Nghost
-	    lenxy = lenx*leny
+        elseif( myid == irank ) then
+          
+          lenx = Niend-Nista+1+2*Nghost
+          leny = Njend-Njsta+1+2*Nghost
+          lenxy = lenx*leny
 
-	    call mpi_irecv( PHI, lenxy, mpi_sp, 0, 1, mpi_comm_world, ireq, ier )
-	    call mpi_wait( ireq, istatus, ier )
+          call mpi_irecv( PHI, lenxy, mpi_sp, 0, 1, mpi_comm_world, ireq, ier )
+          call mpi_wait( ireq, istatus, ier )
 
-	  endif
+        endif
      enddo
 
      deallocate( Nistas, Niends, Njstas, Njends )

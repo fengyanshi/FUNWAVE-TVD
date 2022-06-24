@@ -58,14 +58,13 @@ SUBROUTINE ESTIMATE_HUV(ISTEP)
      IMPLICIT NONE
      INTEGER,INTENT(IN)::ISTEP
      REAL(SP),PARAMETER::n_left=-1.0_SP,n_right=1.0_SP,n_bottom=-1.0_SP,n_top=1.0_SP
-     REAL(SP)::F_left,F_right,F_bottom,F_top,WK_Source
+     REAL(SP)::F_left,F_right,F_bottom,F_top
      REAL(SP),DIMENSION(Ibeg:Iend,Jbeg:Jend)::R1,R2,R3
 ! now work for spherical # if defined (CARTESIAN)
      REAL(SP)::xmk,ymk
 ! now work for spherical # endif
      REAL(SP)::DXg,DYg
-
-     INTEGER::kf,kd
+     INTEGER :: I,J
 
 ! MUSCL-Hancock, Zhou et al., p. 7
 
@@ -88,14 +87,14 @@ SUBROUTINE ESTIMATE_HUV(ISTEP)
 ! now work for spherical # if defined (CARTESIAN)
         IF(WaveMaker(1:6)=='WK_IRR'.OR.WaveMaker(1:6)=='TMA_1D'  &
            .OR.WaveMaker(1:6)=='JON_1D'.OR.WaveMaker(1:6)=='JON_2D' &
-	   .OR.WAVEMAKER(1:10)=='WK_NEW_IRR'&             ! Salatin et al. 2021
+           .OR.WAVEMAKER(1:10)=='WK_NEW_IRR'&             ! Salatin et al. 2021
            .OR.WAVEMAKER(1:13)=='WK_NEW_DATA2D')THEN      ! Salatin et al. 2021
 # if defined (PARALLEL)
 ![---ykchoi Jan/23/2018
 !            xmk=(I-Ibeg)*DXg+npx*(Mloc-2*Nghost)*DXg
 !            ymk=(J-Jbeg)*DYg+npy*(Nloc-2*Nghost)*DYg
-	      xmk=(I-Ibeg)*DXg + (iista-1)*DXg
-	      ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
+            xmk=(I-Ibeg)*DXg + (iista-1)*DXg
+            ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
 !---ykchoi Jan/23/2018]
 # else
             xmk=(I-Ibeg)*DXg
@@ -127,8 +126,8 @@ SUBROUTINE ESTIMATE_HUV(ISTEP)
 ![---ykchoi Jan/23/2018
 !            xmk=(I-Ibeg)*DXg+npx*(Mloc-2*Nghost)*DXg
 !            ymk=(J-Jbeg)*DYg+npy*(Nloc-2*Nghost)*DYg
-	      xmk=(I-Ibeg)*DXg + (iista-1)*DXg
-	      ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
+            xmk=(I-Ibeg)*DXg + (iista-1)*DXg
+            ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
 !---ykchoi Jan/23/2018]
 # else
             xmk=(I-Ibeg)*DXg
@@ -150,8 +149,8 @@ SUBROUTINE ESTIMATE_HUV(ISTEP)
 ![---ykchoi Jan/23/2018
 !            xmk=(I-Ibeg)*DXg+npx*(Mloc-2*Nghost)*DXg
 !            ymk=(J-Jbeg)*DYg+npy*(Nloc-2*Nghost)*DYg
-	      xmk=(I-Ibeg)*DXg + (iista-1)*DXg
-	      ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
+            xmk=(I-Ibeg)*DXg + (iista-1)*DXg
+            ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
 !---ykchoi Jan/23/2018]
 # else
             xmk=(I-Ibeg)*DXg
@@ -173,8 +172,8 @@ SUBROUTINE ESTIMATE_HUV(ISTEP)
 ![---ykchoi Jan/23/2018
 !            xmk=(I-Ibeg)*DXg+npx*(Mloc-2*Nghost)*DXg
 !            ymk=(J-Jbeg)*DYg+npy*(Nloc-2*Nghost)*DYg
-	      xmk=(I-Ibeg)*DXg + (iista-1)*DXg
-	      ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
+            xmk=(I-Ibeg)*DXg + (iista-1)*DXg
+            ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
 !---ykchoi Jan/23/2018]
 # else
             xmk=(I-Ibeg)*DXg
@@ -303,22 +302,13 @@ END SUBROUTINE ESTIMATE_HUV
 SUBROUTINE GET_Eta_U_V_HU_HV
      USE GLOBAL
      IMPLICIT NONE
-     REAL(SP)::Fr,Utotal,Utheta,dep,depl,depr,reta,retal,retar
+     REAL(SP)::Fr,Utotal,Utheta,dep,depl,depr
      REAL(SP),DIMENSION(Mloc,Nloc) :: myA,myC,myD,myF
-# if defined(PARALLEL)
-     REAL(SP),DIMENSION(Nglob) :: AperG,BperG,CperG,DperG,VperG
-     REAL(SP),DIMENSION(Mglob,Nglob) ::glbA,glbC,glbD
-     REAL(SP),DIMENSION(Mglob+2*Nghost,Nglob+2*Nghost)::VG
-# else
-     REAL(SP),DIMENSION(Mloc) :: Axx,Cxx,Dxx
-     REAL(SP),DIMENSION(Mloc) :: U1D
-     REAL(SP),DIMENSION(Nloc) :: Ayy,Cyy,Dyy
-     REAL(SP),DIMENSION(Nloc) :: V1D
 # if defined (CARTESIAN)
-     REAL(SP),DIMENSION(Jend-Jbeg+1) :: Aper,Bper,Cper,Dper,Vper 
-# endif 
-# endif 
-      INTEGER :: IM
+     REAL(SP)::reta,retal,retar
+# endif
+     INTEGER :: I,J
+     REAL(SP) :: tmp1,tmp2,tmp3,tmp4
 
 ! calculate etar, u and vetar, HU, HV
      H=Eta*Gamma3+Depth
@@ -531,10 +521,10 @@ SUBROUTINE GET_Eta_U_V_HU_HV
 
 !------------ykchoi 07/26/2016
 
-     IF( .NOT. DISPERSION) THEN 			
+     IF( .NOT. DISPERSION) THEN
 
-	  Ubar = HU
-	  Vbar = HV
+        Ubar = HU
+        Vbar = HV
 
      ENDIF
 

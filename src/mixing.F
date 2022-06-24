@@ -50,21 +50,23 @@
 !    HISTORY: 05/02/2011 Fengyan Shi
 !
 !-------------------------------------------------------------------------------------
+#define nop(x) associate( x => x ); end associate
+
 SUBROUTINE MIXING_STUFF
      USE GLOBAL
      IMPLICIT NONE
 
 ! calculate mean for smagorinsky s mixing and wave height
-	!ykchoi (be careful)
-	!I think Umean, Vmean is not using in other routine.
+      !ykchoi (be careful)
+      !I think Umean, Vmean is not using in other routine.
       IF( time >= STEADY_TIME )THEN    
       CALL CALCULATE_MEAN(T_INTV_mean,T_sum,DT,Mloc,Nloc,U,V,ETA,ETA0,&
            Umean,Vmean,ETAmean,Usum,Vsum,ETAsum,WaveHeightRMS, &
            WaveHeightAve,Emax,Emin,Num_Zero_Up,Ibeg,Iend,Jbeg,Jend, &
            HrmsSum,HavgSum, &
-	     !ykchoi
-	     ETA2sum, ETA2mean, SigWaveHeight)
-	ENDIF    !ykchoi
+           !ykchoi
+           ETA2sum, ETA2mean, SigWaveHeight)
+      ENDIF    !ykchoi
 
 END SUBROUTINE MIXING_STUFF
 
@@ -85,8 +87,8 @@ END SUBROUTINE MIXING_STUFF
                 WaveHeightRMS, &
                 WaveHeightAve,Emax,Emin,Num_Zero_Up,Ibeg,Iend,Jbeg,Jend, &
                 HrmsSum,HavgSum, &
-	          !ykchoi
-			  ETA2sum,ETA2mean,SigWaveHeight)
+                !ykchoi
+                    ETA2sum,ETA2mean,SigWaveHeight)
 ! calculate mean for smagorinsky s mixing and wave height
 
       USE PARAM
@@ -103,15 +105,20 @@ END SUBROUTINE MIXING_STUFF
       REAL(SP)::Tmpe,Tmp_0
       REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: Emax,Emin
       INTEGER,DIMENSION(M,N),INTENT(INOUT) :: Num_Zero_Up
-	
-	!ykchoi
-	REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: ETA2sum,ETA2mean,SigWaveHeight
+
+      !ykchoi
+      REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: ETA2sum,ETA2mean,SigWaveHeight
+      INTEGER :: I,J
+      nop(Ibeg)
+      nop(Iend)
+      nop(Jbeg)
+      nop(Jend)
       
       T_sum=T_sum+DT
       IF(T_sum.GE.T_INTV_mean)THEN
 
-	ETA2sum = (Eta-ETAmean)*(Eta-ETAmean)*DT + ETA2sum   !ykchoi
-	ETA2mean = ETA2sum/T_sum
+      ETA2sum = (Eta-ETAmean)*(Eta-ETAmean)*DT + ETA2sum   !ykchoi
+      ETA2mean = ETA2sum/T_sum
 
         Usum=U*DT+Usum
         Vsum=V*DT+Vsum
@@ -119,20 +126,20 @@ END SUBROUTINE MIXING_STUFF
         Umean=Usum/T_sum
         Vmean=Vsum/T_sum
         ETAmean=ETAsum/T_sum
-	  
-	  !ykchoi includes ETAmean, fyshi added 03/22/2016, ykchoi move the 
+
+        !ykchoi includes ETAmean, fyshi added 03/22/2016, ykchoi move the 
           ! two statements right after IF because ETA2sum should use the previsou
           ! ETAmean. 04/20/2016
-	  !ETA2sum = (Eta-ETAmean)*(Eta-ETAmean)*DT + ETA2sum 
-	  !ETA2mean = ETA2sum/T_sum
+        !ETA2sum = (Eta-ETAmean)*(Eta-ETAmean)*DT + ETA2sum 
+        !ETA2mean = ETA2sum/T_sum
 
         T_sum=T_sum-T_INTV_mean   ! T_sum=ZERO? (ykchoi)
         Usum=ZERO
         Vsum=ZERO
         ETAsum=ZERO
-	  ETA2sum=ZERO     !ykchoi
+        ETA2sum=ZERO     !ykchoi
 
-	  SigWaveHeight = 4.004*SQRT( ETA2mean )  !ykchoi
+        SigWaveHeight = 4.004*SQRT( ETA2mean )  !ykchoi
 
 ! wave height
        DO J=1,N
@@ -154,8 +161,8 @@ END SUBROUTINE MIXING_STUFF
         Usum=U*DT+Usum
         Vsum=V*DT+Vsum
         ETAsum=ETA*DT+ETAsum
-	  !ykchoi, fyshi added ETAmean 03/22/2016
-	  ETA2sum = (Eta-ETAmean)*(Eta-ETAmean)*DT + ETA2sum
+        !ykchoi, fyshi added ETAmean 03/22/2016
+        ETA2sum = (Eta-ETAmean)*(Eta-ETAmean)*DT + ETA2sum
 
 ! wave height
        DO J=1,N

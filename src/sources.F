@@ -64,10 +64,13 @@ SUBROUTINE SourceTerms
 
      IMPLICIT NONE
      REAL,DIMENSION(Mloc,Nloc) :: nu_vis
+     REAL(SP) :: Dxg,Dyg,WK_Source
+# if defined (CARTESIAN)
      LOGICAL :: PQ_scheme = .FALSE.
-     REAL(SP) :: xmk,ymk,Dxg,Dyg,WK_Source
-     INTEGER :: kd,kf
-     
+     REAL(SP) :: xmk,ymk
+# endif     
+     INTEGER :: I,J,kf
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!START!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     REAL(SP) :: AA                                       ! Salatin et al. 2021
     REAL(SP), DIMENSION(Nfreq) :: BB,CC                  ! Salatin et al. 2021
@@ -182,15 +185,15 @@ ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-     nu_vis=ZERO	
-	! ykchoi(08.18.2015)
-	! new variable :: WAVEMAKER_VIS
-        ! should include ghost cells 02/28/2017 fyshi
+     nu_vis=ZERO
+      ! ykchoi(08.18.2015)
+      ! new variable :: WAVEMAKER_VIS
+      ! should include ghost cells 02/28/2017 fyshi
 
       !IF(VISCOSITY_BREAKING)THEN
       IF(VISCOSITY_BREAKING .OR. WAVEMAKER_VIS)THEN
 
-        nu_vis = nu_break
+        nu_vis = REAL(nu_break, 4)
 
 # if defined (DEEP_DRAFT_VESSEL)
        nu_vis = nu_vis + VisVessel_2D
@@ -208,7 +211,7 @@ ENDIF
      IF(DIFFUSION_SPONGE)THEN
 !    should include ghost cells 02/28/2017, fyshi
 
-       nu_vis = nu_vis + nu_sponge
+       nu_vis = nu_vis + REAL(nu_sponge, 4)
 
 !       DO J=Jbeg,Jend
 !       DO I=Ibeg,Iend
@@ -217,8 +220,6 @@ ENDIF
 !       ENDDO          
 
      ENDIF
-
-107  format(500f12.6)
 
 ! depth gradient term
      DO J=Jbeg,Jend
@@ -264,8 +265,8 @@ ENDIF
 
        IF(WaveMakerCurrentBalance)THEN
 # if defined (PARALLEL)
-	      xmk=(I-Ibeg)*DXg + (iista-1)*DXg
-	      ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
+            xmk=(I-Ibeg)*DXg + (iista-1)*DXg
+            ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
 # else
             xmk=(I-Ibeg)*DXg
             ymk=(J-Jbeg)*DYg
@@ -293,7 +294,7 @@ ENDIF
 # else
                    -Cd(I,J)*V(I,J)*SQRT(U(I,J)*U(I,J)+V(I,J)*V(I,J)) &
 # endif                          
-		          ! dispersion
+                      ! dispersion
                           ! (h+eta)(u*\nabla V4 + V4 * \nabla u -v1pp-v2-v3)
                    + Gamma1*MASK9(I,J)*Max(H(I,J),MinDepthFrc)*(         & 
                      U(I,J)*0.5_SP*(V4(I+1,J)-V4(I-1,J))/DX+V(I,J)*0.5_SP*(V4(I,J+1)-V4(I,J-1))/DY &
@@ -319,8 +320,8 @@ ENDIF
 
        IF(WaveMakerCurrentBalance)THEN
 # if defined (PARALLEL)
-	      xmk=(I-Ibeg)*DXg + (iista-1)*DXg
-	      ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
+            xmk=(I-Ibeg)*DXg + (iista-1)*DXg
+            ymk=(J-Jbeg)*DYg + (jjsta-1)*DYg
 # else
             xmk=(I-Ibeg)*DXg
             ymk=(J-Jbeg)*DYg

@@ -50,6 +50,7 @@
 !    06/09/2017 Fengyan Shi
 !    02/05/2018 put in the sediment module 
 !-------------------------------------------------------------------------------------
+#define nop(x) associate( x => x ); end associate
 
 # if defined (SEDIMENT)
 
@@ -114,17 +115,15 @@ MODULE SEDIMENT_MODULE
 CONTAINS
   
 SUBROUTINE SEDIMENT_INITIAL
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL, INPUT_FILE_NAME
-# if defined (PARALLEL)
-  USE GLOBAL,ONLY : iista,jjsta   !ykchoi Jan/23/2018
-# endif
-                    
+  USE GLOBAL,ONLY : SMALL, INPUT_FILE_NAME
   USE INPUT_READ
   IMPLICIT NONE
 
   CHARACTER(LEN=80)::FILE_NAME=' '
-  CHARACTER(LEN=80)::TMP_NAME=' '
-  INTEGER :: Ifile,ierr
+  INTEGER :: ierr
+# if !defined (PARALLEL)
+  INTEGER :: I,J
+# endif
 
 ! read  from input.txt
       FILE_NAME=INPUT_FILE_NAME
@@ -768,7 +767,7 @@ SUBROUTINE SEDIMENT_INITIAL
 
         Depth_ini = Depth
         ava=ZERO
-        Zs=LARGE		
+        Zs=LARGE
         ZbOld=ZERO
         dZb=ZERO
         CH0=ZERO
@@ -799,10 +798,10 @@ SUBROUTINE SEDIMENT_INITIAL
         P_ave=ZERO
         Delta_c=ZERO
         Mask_s=ZERO
-        Zb=ZERO	
+        Zb=ZERO
         Zb_avalanching = ZERO
         TotalSuspendLoad = ZERO
-        TotalBedLoad = ZERO	
+        TotalBedLoad = ZERO
         BedFluxX = ZERO
         BedFluxY = ZERO
 
@@ -855,18 +854,16 @@ SUBROUTINE SEDIMENT_INITIAL
 END SUBROUTINE SEDIMENT_INITIAL
 
 SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL
-# if defined (PARALLEL)
-  USE GLOBAL,ONLY : iista,jjsta   !ykchoi Jan/23/2018
-# endif
-                    
+  USE GLOBAL,ONLY : SMALL
   IMPLICIT NONE
-  INTEGER::ISTEP,ISTAGE,IVAR
+  INTEGER::ISTEP,IVAR
   REAL(SP) :: gamma_cao
   REAL(SP),DIMENSION(:,:),ALLOCATABLE :: Scalx,Scaly
-  REAL(SP),DIMENSION(Ibeg:Iend,Jbeg:Jend)::R1,R2,R3
+  REAL(SP),DIMENSION(Ibeg:Iend,Jbeg:Jend)::R1
   REAL(SP) :: Weight0 = 0.9_SP, Weight1=0.1_SP
   REAL(SP) :: Angle_cur,bedf,fr,Pd,Cb
+  INTEGER :: I,J
+  REAL(SP) :: tmp1,tmp2
 
     ALLOCATE(Scalx(Mloc1,Nloc),Scaly(Mloc,Nloc1))
 
@@ -995,8 +992,8 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
             ustar_c = 0.4_SP*u_c/(-1.0_SP+log(30.0_SP*Hpo(I,J)/k_s))
 ! diffusion x
          IF(MASK(I-1,J).GT.0)THEN
-            u_c2=SQRT(U(I-1,J)*U(I-1,J)+V(I-1,J)*V(I-1,J))				
-            ustar_c2= 0.4_SP*u_c2/(-1.0_SP+log(30.0_SP*Hpo(I-1,J)/k_s))			              
+            u_c2=SQRT(U(I-1,J)*U(I-1,J)+V(I-1,J)*V(I-1,J))
+            ustar_c2= 0.4_SP*u_c2/(-1.0_SP+log(30.0_SP*Hpo(I-1,J)/k_s))
             k2=5.93_SP*(ustar_c2+ustar_c)*(Hpo(I-1,J)+Hpo(I,J))/4.0_SP
 # if defined (CARTESIAN)
          Scalx(I,J)=Scalx(I,J) &
@@ -1067,7 +1064,7 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 
       BedFluxX=ZERO
       BedFluxY=ZERO
-    	
+
     DO J=Jbeg,Jend
     DO I=Ibeg,Iend
     IF(MASK(I,J).GT.0.AND.H(I,J)>MinDepthPickup)THEN
@@ -1079,7 +1076,7 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 
     ! note rho_w is removed, also removed in tau_cr, 
 
-          Tau_xy(I,J)= 0.16_SP/(1.0+log(k_s/(30.0_SP*Hpo(I+1,J))))**2*(u_c**2.)	
+          Tau_xy(I,J)= 0.16_SP/(1.0+log(k_s/(30.0_SP*Hpo(I+1,J))))**2*(u_c**2.)
 
        IF (CohesiveSediment)THEN
 
@@ -1126,7 +1123,7 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
        ENDIF ! end cohesive
 
     ELSE ! dry point
-          Pickup(I,J)=0.0_SP	
+          Pickup(I,J)=0.0_SP
     ENDIF ! end dry point
 
         IF(IN_Mask_s) THEN
@@ -1194,7 +1191,8 @@ SUBROUTINE FLUX_SCALAR_BC(IVAR,Scalx,Scaly)
     INTEGER, INTENT(IN) :: IVAR
     REAL(SP), DIMENSION(Mloc1,Nloc), INTENT(INOUT) :: Scalx
     REAL(SP), DIMENSION(Mloc,Nloc1), INTENT(INOUT) :: Scaly
-    INTEGER :: I,J,K
+    INTEGER :: I,J
+    nop(IVAR)
 
     ! west
 # if defined (PARALLEL)
@@ -1256,15 +1254,11 @@ SUBROUTINE FLUX_SCALAR_BC(IVAR,Scalx,Scaly)
 END SUBROUTINE FLUX_SCALAR_BC
 
 SUBROUTINE MORPHOLOGICAL_CHANGE
-  USE GLOBAL,ONLY : SMALL
-# if defined (PARALLEL)
-  USE GLOBAL,ONLY : iista,jjsta  
-# endif
-                    
   IMPLICIT NONE
   INTEGER :: VTYPE,i4,i4_record
   REAL(SP) :: slope_max,dh
   REAL(SP),DIMENSION(4) :: slope4
+  INTEGER :: I,J
 
     DO J=Jbeg,Jend
     DO I=Ibeg,Iend

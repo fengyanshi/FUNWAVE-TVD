@@ -65,9 +65,9 @@ SUBROUTINE WAVE_BREAKING
         CALL BREAKING(Mloc,Nloc,ETAx,ETAy,ETAT,Cbrk1,Cbrk2,H,MinDepthFrc,DT,&
                DX,DY,T_brk,AGE_BREAKING)
 
-	ELSEIF( WAVEMAKER_VIS )THEN
-	  ! ykchoi(08.19.2015)
-	  !
+      ELSEIF( WAVEMAKER_VIS )THEN
+        ! ykchoi(08.19.2015)
+        !
         CALL VISCOSITY_WMAKER(Mloc,Nloc,ETAT,visbrk,H,MinDepthFrc,DX,DY)
       ENDIF
 
@@ -87,22 +87,25 @@ END SUBROUTINE WAVE_BREAKING
 SUBROUTINE BREAKING(M,N,ETAx,ETAy,ETAT,Cbrk1,Cbrk2,H,MinDepthFrc,&
                DT,DX,DY,T_brk,AGE)
      USE PARAM
-     USE GLOBAL,ONLY : Depth,nu_break,ETA,Nghost,Xc_WK,Yc_WK,Ibeg,Iend,&
+     USE GLOBAL,ONLY : Depth,nu_break,ETA,Xc_WK,Yc_WK,Ibeg,Iend,&
                        Jbeg,Jend,Width_WK,Xc_WK,Yc_WK,Ywidth_WK, &
                        WAVEMAKER_Cbrk,nu_bkg,&
                        ROLLER_FLUX, UNDERTOW_U, UNDERTOW_V,ETAmean, &
-                       U,V,tmp4preview
+                       U,V
 # if defined(PARALLEL)
-     USE GLOBAL,ONLY : npx,npy, &
-	                 iista,jjsta   !ykchoi Jan/23/2018
+     USE GLOBAL,ONLY : iista,jjsta   !ykchoi Jan/23/2018
 # endif
      IMPLICIT NONE
      INTEGER,INTENT(IN)::M,N
      REAL(SP),INTENT(IN)::Cbrk1,Cbrk2,MinDepthFrc,DT,T_brk
-     REAL(SP) :: cap1,cap2
+     REAL(SP) :: cap1
      REAL(SP) :: xmk,ymk,DXg,DYg
-     REAL(SP) :: etat_star,B,T_star
-!     REAL(SP) :: lim_breaker=0.10
+# if defined (VIS_DEPTH_RATIO)
+     REAL(SP) :: B
+# endif
+# if defined (VIS_KENNEDY_ORIGINAL)
+     REAL(SP) :: etat_star,T_star
+# endif
 # if defined (CARTESIAN)
      REAL(SP),INTENT(IN)::DX,DY
 # else
@@ -111,8 +114,10 @@ SUBROUTINE BREAKING(M,N,ETAx,ETAy,ETAT,Cbrk1,Cbrk2,H,MinDepthFrc,&
      REAL(SP),DIMENSION(M,N),INTENT(IN)::ETAx,ETAy,ETAt,H
      REAL(SP),DIMENSION(M,N),INTENT(OUT)::AGE
      REAL(SP)::C,C1,R,Angle,AGE1,AGE2,AGE3,propx,propy,propxy
+     INTEGER :: I,J
+     REAL(SP) :: tmp1,tmp2,tmp3,tmp4
 
-    
+
 ! ykchoi: do loop should start jbeg-1 end jend+1 because
 !         the ghost cells are used in source.F, 10/27/2017
      DO J = Jbeg-1, Jend+1

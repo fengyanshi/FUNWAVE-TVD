@@ -175,11 +175,11 @@ Program FUNWAVE_TVD
 #    endif
 # endif
 
-	![ykchoi(14.12.24.)
-	IF(INI_UVZ)THEN
+      ![ykchoi(14.12.24.)
+      IF(INI_UVZ)THEN
         TIME=HotStartTime
       ENDIF
-	!ykchoi(14.12.24.)]
+      !ykchoi(14.12.24.)]
 
      CALL INDEX
 
@@ -299,8 +299,8 @@ Program FUNWAVE_TVD
 # endif
   
 ! U0, V0 are moved to following part due to computation of Ut, Vt.
-	U0=U   !ykchoi(15. 08. 06.)
-	V0=V   !ykchoi
+      U0=U   !ykchoi(15. 08. 06.)
+      V0=V   !ykchoi
 
 # if defined (VESSEL)
        CALL VESSEL_FORCING

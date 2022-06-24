@@ -54,15 +54,11 @@ SUBROUTINE STATISTICS
      IMPLICIT NONE
 
      REAL(SP)::MassVolume=ZERO,Energy=ZERO,MaxEta=ZERO,MinEta=ZERO, &
-              MaxU=ZERO,MaxV=ZERO,Fr=ZERO,UTotal=ZERO,UTotalMax=ZERO, &
-	      MaxM=ZERO
-     REAL(SP)::MassVolume0
-     LOGICAL :: FirstCallStatistics = .TRUE.
-     SAVE FirstCallStatistics
+              MaxU=ZERO,MaxV=ZERO,Fr=ZERO,UTotal=ZERO,UTotalMax=ZERO
 # if defined (PARALLEL)
      REAL(SP)::myvar
 # endif
-!
+     INTEGER :: I,J
 
 
      MassVolume=ZERO

@@ -59,16 +59,17 @@ SUBROUTINE UPDATE_MASK
 # if defined (PARALLEL)
      REAL(SP)::myvar
 # endif
+     INTEGER :: I,J
 
      ALLOCATE(MASKtmp(Mloc,Nloc),MASK9tmp(Mloc,Nloc))
      ALLOCATE(ETAtmp(Mloc,Nloc))
 
 ! for the serial code, MASK at ghost cells keep no change
 
-#if defined(PARALLEL)
+# if defined(PARALLEL)
      call phi_int_exch(MASK)
      call phi_int_exch(MASK9)
-#endif
+# endif
 
      MASKtmp=MASK
 !     ETAtmp=ETA

@@ -50,10 +50,13 @@
 !      04/05/2011  Jeff Harris, corrected bugs in do-loop
 !
 ! -----------------------------------------------------------------------------------
+#define nop(x) associate( x => x ); end associate
+
 SUBROUTINE BOUNDARY_CONDITION
      USE GLOBAL
      IMPLICIT NONE
      REAL(SP)::Xi,Deps
+     INTEGER :: I,J
 
 
 ! four sides of computational domain
@@ -429,6 +432,9 @@ SUBROUTINE EXCHANGE
     INTEGER :: VTYPE
 # if defined (CARTESIAN)
     REAL(SP),DIMENSION(Mloc,Nloc) :: rMASK
+#   if defined (FILTERING)
+      INTEGER :: I,J
+#   endif
 # endif
 
 # if defined (CARTESIAN)
@@ -436,12 +442,12 @@ SUBROUTINE EXCHANGE
     CALL PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,Eta,VTYPE,PERIODIC)
 
     IF(VISCOSITY_BREAKING) THEN
-	CALL PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,AGE_BREAKING,VTYPE,PERIODIC)
+      CALL PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,AGE_BREAKING,VTYPE,PERIODIC)
     ENDIF
     
-    !ykchoi (08.19.2015) :: new variable (WAVEMAKER_VIS) 	
+    !ykchoi (08.19.2015) :: new variable (WAVEMAKER_VIS)
     IF(VISCOSITY_BREAKING .OR. WAVEMAKER_VIS) THEN
-	CALL PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,nu_break,VTYPE,PERIODIC)
+      CALL PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,nu_break,VTYPE,PERIODIC)
     ENDIF
 
     IF(VISCOSITY_BREAKING .OR. DIFFUSION_SPONGE .OR. WAVEMAKER_VIS)THEN
@@ -451,7 +457,7 @@ SUBROUTINE EXCHANGE
 
     rMASK = MASK ! for periodic boundary condition
     CALL PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,rMASK,VTYPE,PERIODIC)  
-    MASK = rMASK  
+    MASK = INT(rMASK)
 
     VTYPE=2
     CALL PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,U,VTYPE,PERIODIC)
@@ -535,6 +541,8 @@ SUBROUTINE PHI_COLL_VARIABLE_LENGTH(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,PHI,VTY
     INTEGER,INTENT(IN) :: VTYPE
     INTEGER,INTENT(IN) :: Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost
     REAL(SP),INTENT(INOUT) :: PHI(Mloc,Nloc)
+    INTEGER :: I,J,K
+    nop(VTYPE)
 
       ! x-direction
 # if defined (PARALLEL)
@@ -626,13 +634,12 @@ SUBROUTINE PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,PHI,VTYPE)
 # if defined (PARALLEL)
 # if defined (COUPLING)
     USE GLOBAL, ONLY : n_east,n_west,n_suth,n_nrth,&
-                     comm2d, ier,myid,PX,PY,&
-                       NumberProcessor,ProcessorID, &
         IN_DOMAIN_WEST,IN_DOMAIN_EAST,IN_DOMAIN_SOUTH,IN_DOMAIN_NORTH
 # else
-    USE GLOBAL, ONLY : n_east,n_west,n_suth,n_nrth, &
-                     comm2d, ier,myid,PX,PY,&
-                       NumberProcessor,ProcessorID
+    USE GLOBAL, ONLY : n_east,n_west,n_suth,n_nrth
+# endif
+# if defined (CARTESIAN)
+    USE GLOBAL, ONLY : ier,myid,PX,PY,ProcessorID
 # endif
 # endif
     IMPLICIT NONE
@@ -643,12 +650,14 @@ SUBROUTINE PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,PHI,VTYPE)
     LOGICAL :: PERIODIC
 # endif
 # if defined (PARALLEL)
+# if defined (CARTESIAN)
     INTEGER,DIMENSION(1) :: req
-    INTEGER :: nreq,len,ll,l,II,JJ
+    INTEGER :: len,II
     integer,dimension(MPI_STATUS_SIZE,1) :: status
     REAL(SP),DIMENSION(Mloc,Nghost) :: xx,send2d
-    REAL(sp) :: myvar,mybeta
 # endif
+# endif
+    INTEGER I,J,K
 
 ! periodic first because it is not related to VTYPE
 # if defined (CARTESIAN)
