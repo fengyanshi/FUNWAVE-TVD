@@ -247,8 +247,8 @@ END SUBROUTINE MIXING_STUFF
        DO J=1,Nloc
        DO I=1,Mloc
         IF(Num_Zero_Up(I,J)>=2)THEN
-          WaveHeightAve(I,J)=HavgSum(I,J)/Num_Zero_Up(I,J)
-          WaveHeightRMS(I,J)=SQRT(HrmsSum(I,J)/Num_Zero_Up(I,J))
+          WaveHeightAve(I,J)=HavgSum(I,J)/(Num_Zero_Up(I,J)-1)
+          WaveHeightRMS(I,J)=SQRT(HrmsSum(I,J)/(Num_Zero_Up(I,J)-1))
         ENDIF
 !        Num_Zero_Up(I,J)=0
 !        HavgSum(I,J)=ZERO
