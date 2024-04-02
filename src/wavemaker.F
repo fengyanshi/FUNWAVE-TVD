@@ -3052,6 +3052,8 @@ SUBROUTINE CALCULATE_NEW_Cm_Sm(M,N,DX,DY,Xc,Ibeg,Jbeg,mfreq,mtheta,D_gen,&
     USE GLOBAL, ONLY : myid,npx,npy,px,py,Mglob,Nglob, &
         iista,jjsta,&   !ykchoi Jan/23/2018
         loop_index,Freq !Chen, Salatin
+# else
+    USE GLOBAL, ONLY : Freq, loop_index
 # endif
     IMPLICIT NONE
     INTEGER,INTENT(IN) :: M,N,mfreq,mtheta,Ibeg,Jbeg
